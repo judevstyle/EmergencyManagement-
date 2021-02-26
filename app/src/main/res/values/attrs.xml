@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <bool name="isTablet">false</bool>
+    <bool name="isSmartphone">true</bool>
+
+    <declare-styleable name="CustomTextView">
+        <attr name="font_name">
+            <enum value="1" name="kanitBold"/>
+            <enum value="2" name="kanitLight"/>
+            <enum value="3" name="kanitRegular"/>
+            <enum value="4" name="kanitItalic"/>
+            <enum value="5" name="kanitMeduim"/>
+        </attr>
+    </declare-styleable>
+
+
+</resources>

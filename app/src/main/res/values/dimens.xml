@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="higth_button">42dp</dimen>
+    <dimen name="text_size_button">16sp</dimen>
+    <dimen name="dimen20">20dp</dimen>
+    <dimen name="dimen4">4dp</dimen>
+    <dimen name="dimen8">8dp</dimen>
+    <dimen name="dimen24">24dp</dimen>
+    <dimen name="dimen12">12dp</dimen>
+    <dimen name="dimen14">14dp</dimen>
+    <dimen name="txt10">10sp</dimen>
+    <dimen name="dimen26">26dp</dimen>
+    <dimen name="txt18">18sp</dimen>
+    <dimen name="txt16">16sp</dimen>
+    <dimen name="txt12">12sp</dimen>
+    <dimen name="dimen2">2dp</dimen>
+    <dimen name="txt20">20sp</dimen>
+    <dimen name="txt14">14sp</dimen>
+</resources>
