@@ -1,0 +1,11 @@
+{
+  "id": "1234",
+  "username": "admin",
+  "password": "test",
+  "name": "สมหญิง ชาติไทย",
+  "gender": "f",
+  "email": "somying@pt.co.th",
+  "tel": "0999999999",
+  "idc": "1111111111111",
+  "bd": "1999/01/01"
+}

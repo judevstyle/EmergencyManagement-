@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/custom_marker_view"
+    android:layout_width="52dp"
+    android:layout_height="wrap_content">
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.zine.ketotime.view.CustomTextView
+            android:background="@drawable/bg_name_maps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="9dp"
+            android:paddingLeft="@dimen/dimen4"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:paddingRight="@dimen/dimen4"
+            android:layout_gravity="center"
+            android:text="Me" />
+        <RelativeLayout
+            android:layout_gravity="center"
+            android:layout_width="40dp"
+            android:layout_height="39dp"
+            android:background="@drawable/ic_marker"
+            android:backgroundTint="@color/colorPrimary">
+
+
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/user_dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginRight="@dimen/dimen8"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="6dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="9dp"
+                android:contentDescription="@null"
+                android:src="@drawable/test_user"
+                app:civ_border_color="#fff" />
+        </RelativeLayout>
+
+
+    </LinearLayout>
+</RelativeLayout>

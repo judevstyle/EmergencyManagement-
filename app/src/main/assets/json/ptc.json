@@ -1,0 +1,36 @@
+{
+  "values": [
+    {
+      "ex_date": "07/11/2018",
+      "ex_nextdate": "",
+      "name": "klljkk nk",
+      "of_datetime": "07/11/2018",
+      "of_name": "",
+      "ot_bec": "",
+      "ot_date": "",
+      "ot_refname": "07/11/2018",
+      "point_1": "",
+      "point_2": "",
+      "point_3": "",
+      "position": "",
+      "station": "",
+      "toolsValues": [
+        {
+          "toolsId": 1,
+          "toolsName": "กระบอกตรวง",
+          "toolsChecked": true,
+          "toolsOther": "กระบอกตรวงแตก"
+        },
+        {
+          "toolsId": 1,
+          "toolsName": "กระบอกตรวง",
+          "toolsChecked": true,
+          "toolsOther": "กระบอกตรวงแตก"
+        }
+      ],
+      "ref1": true,
+      "ref2": true,
+      "result": "90"
+    }
+  ]
+}

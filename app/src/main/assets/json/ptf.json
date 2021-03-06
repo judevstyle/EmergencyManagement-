@@ -1,0 +1,27 @@
+{
+  "values": [
+    {
+      "date": "07/11/2018",
+      "name": "ccc",
+      "other": "x",
+      "position": "cz dvsdvcc",
+      "station": "xxx",
+      "time": "6:52 AM",
+      "toolsValues": [
+        {
+          "toolsId": 1,
+          "toolsName": "กระบอกตรวง",
+          "toolsChecked": true,
+          "toolsOther": "กระบอกตรวงแตก"
+        },
+        {
+          "toolsId": 1,
+          "toolsName": "กระบอกตรวง",
+          "toolsChecked": true,
+          "toolsOther": "กระบอกตรวงแตก"
+        }
+      ],
+      "result": "90"
+    }
+  ]
+}
