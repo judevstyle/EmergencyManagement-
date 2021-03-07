@@ -29,6 +29,7 @@
             app:pulse_startFromScratch="false"></pl.bclogic.pulsator4droid.library.PulsatorLayout>
 
         <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/actionWorning"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_alignParentBottom="true"

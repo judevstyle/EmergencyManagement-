@@ -1,6 +1,7 @@
 package com.panuphong.smssender
 
 import android.app.Application
+import com.idon.emergencmanagement.viewmodel.LocationViewmodel
 import com.panuphong.smssender.repository.TaskRespt
 import com.panuphong.smssender.viewmodel.TaskViewModel
 import com.zine.ketotime.database.KetoDatabase
@@ -32,7 +33,6 @@ class App : Application() {
 
                 single {
                     KetoDatabase.invoke(androidApplication()).taskDao()
-
                 }
 
             }
@@ -40,15 +40,22 @@ class App : Application() {
 
             val taskViewModel = module {
                 single {
-
                     TaskRespt(get())
-
                 }
                 viewModel { TaskViewModel(get()) }
 
             }
 
-            modules(roomModule, taskViewModel)
+
+            val attackData = module{
+
+                viewModel { LocationViewmodel() }
+
+
+
+            }
+
+            modules(roomModule, taskViewModel,attackData)
 
 
         }

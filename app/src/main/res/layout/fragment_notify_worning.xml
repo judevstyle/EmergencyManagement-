@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+
+
+    <ScrollView
+        android:fillViewport="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_margin="@dimen/dimen12"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="หัวข้อ"/>
+
+            <EditText
+                android:padding="@dimen/dimen4"
+                android:background="@drawable/bg_input"
+                android:id="@+id/topicET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+            <TextView
+                android:layout_marginTop="@dimen/dimen12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="รายละเอียดการเตือน"/>
+            <EditText
+                android:padding="@dimen/dimen4"
+                android:background="@drawable/bg_input"
+                android:id="@+id/descET"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+            <FrameLayout
+                android:layout_marginTop="@dimen/dimen12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_gravity="bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="พื้นที่"/>
+
+                <TextView
+                    android:id="@+id/actionSelectMaps"
+                    android:drawableRight="@drawable/ic_baseline_map_24"
+                    android:drawableTint="@color/colorPrimary"
+                    android:textColor="@color/colorPrimary"
+                    android:padding="@dimen/dimen4"
+                    android:layout_gravity="right"
+                    android:gravity="bottom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="เลือกจุดเตือนภัย"/>
+
+            </FrameLayout>
+
+
+            <fragment
+                android:id="@+id/maps"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="160dp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_marginTop="@dimen/dimen12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="รูปภาพ"/>
+
+
+            </FrameLayout>
+
+            <View
+                android:layout_marginTop="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="@color/colorPrimary"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_marginTop="@dimen/dimen8"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/cv_evidence"
+                tools:itemCount="3"
+                />
+            <com.zine.ketotime.view.CustomButton
+                android:layout_marginTop="@dimen/dimen12"
+                android:background="@drawable/bg_input_button_primary"
+                android:layout_width="match_parent"
+                android:textColor="@color/white"
+                android:layout_height="@dimen/higth_button"
+                android:text="แจ้งเตือน"/>
+
+
+
+
+        </LinearLayout>
+
+
+
+    </ScrollView>
+
+
+</LinearLayout>

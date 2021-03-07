@@ -22,6 +22,7 @@ import com.idon.emergencmanagement.service.LocationService
 import com.idon.emergencmanagement.service.LocationUpdateService
 import com.idon.emergencmanagement.service.MyLocationService
 import com.idon.emergencmanagement.view.activity.TestActivity
+import com.idon.emergencmanagement.viewmodel.LocationViewmodel
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -31,10 +32,12 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.karumi.dexter.listener.single.PermissionListener
 import com.tt.workfinders.BaseClass.BaseActivity
+import org.koin.android.viewmodel.ext.android.viewModel
 
 
 class MainActivity : BaseActivity() {
 
+    private val locationViewModel: LocationViewmodel by viewModel()
 
     var wakelock: PowerManager.WakeLock? = null
     lateinit var locationRequest: LocationRequest

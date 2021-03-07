@@ -30,8 +30,6 @@
             android:background="@drawable/ic_marker"
             android:backgroundTint="@color/colorPrimary">
 
-
-
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/user_dp"
                 android:layout_width="22dp"

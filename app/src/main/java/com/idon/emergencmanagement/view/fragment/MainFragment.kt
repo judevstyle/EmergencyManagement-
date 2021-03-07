@@ -1,4 +1,4 @@
-package com.idon.emergencmanagement.view
+package com.idon.emergencmanagement.view.fragment
 
 import android.app.Activity
 import android.content.Context
@@ -8,12 +8,14 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.InflateException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.DrawableRes
-import com.google.android.gms.maps.CameraUpdateFactory
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapFragment
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
@@ -36,6 +38,7 @@ class MainFragment : BaseFragment(), OnMapReadyCallback,GoogleMap.OnPolylineClic
     private lateinit var mRoutePolyline: Polyline
 
     private var mGoogleMap: GoogleMap? = null
+     var views: View? = null
 
     override fun provideFragmentView(
         inflater: LayoutInflater?,
@@ -43,7 +46,18 @@ class MainFragment : BaseFragment(), OnMapReadyCallback,GoogleMap.OnPolylineClic
         savedInstanceState: Bundle?
     ): View {
 
-        return LayoutInflater.from(context).inflate(R.layout.fragment_main, parent, false)
+//        if (views != null) {
+//            val parents = views?.parent as ViewGroup
+//            parents?.removeView(views)
+//        }
+        try {
+            views = LayoutInflater.from(context).inflate(R.layout.fragment_main, parent, false)
+        } catch (e: InflateException) {
+            /* map is already there, just return view as it is */
+        }
+        return views!!;
+
+//        return LayoutInflater.from(context).inflate(R.layout.fragment_main, parent, false)
 
     }
 
@@ -60,6 +74,10 @@ class MainFragment : BaseFragment(), OnMapReadyCallback,GoogleMap.OnPolylineClic
         }
         actionHide.setOnClickListener {
             actionHide()
+        }
+        actionWorning.setOnClickListener {
+            findNavController().navigate(R.id.action_to_mwoning)
+
         }
 
     }
@@ -313,5 +331,10 @@ class MainFragment : BaseFragment(), OnMapReadyCallback,GoogleMap.OnPolylineClic
 
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        val mapFragment =  activity?.supportFragmentManager?.findFragmentById(R.id.map) as SupportMapFragment
+        if (mapFragment != null) activity?.supportFragmentManager?.beginTransaction()?.remove(mapFragment)?.commit()
+    }
 
 }
