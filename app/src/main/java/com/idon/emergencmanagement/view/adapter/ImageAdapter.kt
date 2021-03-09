@@ -11,19 +11,17 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.idon.emergencmanagement.R
-import com.idon.emergencmanagement.model.ImgData
+import com.idon.emergencmanagement.model.ImageWorningImg
 import com.panuphong.smssender.helper.HandleClickListener
+import com.zine.ketotime.util.Constant
 import kotlinx.android.synthetic.main.item_img.view.*
 
 class ImageAdapter(
     context: Context, val listener: HandleClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val VIEW_TYPE_LOADING: Int = 1
-    private val VIEW_TYPE_ITEM: Int = 2
-    private var STATE_ALLDEL: Boolean = false
 
-    var items: ArrayList<ImgData>? = null
+    var items: ArrayList<ImageWorningImg>? = null
 
     init {
         this.items = ArrayList()
@@ -55,30 +53,30 @@ class ImageAdapter(
 //        Log.e("dd","sl ${items!!.size}")
 
         if (items == null) return 1
-        return items!!.size +1
+        return items!!.size + 1
     }
 
 
-    fun getItem(position: Int): ImgData {
+    fun getItem(position: Int): ImageWorningImg {
         return items!!.get(position)!!
     }
 
 
-
     override fun getItemViewType(position: Int): Int {
 
-        if (items == null || position == items!!.size ) return 1
+        Log.e("position","${position} ${items?.size}")
+        if (items == null || position == 0) return 1
         return 0
     }
 
-    fun setItem(items: ImgData) {
+    fun setItem(items: ImageWorningImg) {
         if (this.items == null)
             this.items = ArrayList()
-        Log.e("dd","sl")
         this.items!!.add(items)
+        notifyDataSetChanged()
     }
 
-    fun getData():ArrayList<ImgData>{
+    fun getData(): ArrayList<ImageWorningImg> {
         return items!!
     }
 
@@ -95,7 +93,7 @@ class ImageAdapter(
         if (holder.itemViewType == 0) {
             if (holder is ViewHolder) {
 
-                holder.bind(items!![position])
+                holder.bind(items!![position-1])
                 holder.itemView.setOnClickListener {
                     listener.onItemClick(
                         holder.itemView,
@@ -108,10 +106,8 @@ class ImageAdapter(
         } else {
 
             if (holder is ViewHolderAdd) {
-                holder.itemView.setOnClickListener {
-                    listener.onItemClick(it,position,2)
+               holder.bind()
 
-                }
             }
 
 
@@ -122,43 +118,53 @@ class ImageAdapter(
 
     inner class ViewHolder(itemsView: View) : RecyclerView.ViewHolder(itemsView) {
 
-        fun bind(data: ImgData?) {
+        fun bind(data: ImageWorningImg?) {
 //            val dec = DecimalFormat("#,###.00")
 
             itemView.apply {
 
-                data?.pid?.let {
-
-                    if (!it.equals("")) {
-//                        Glide.with(context).load("${KeySK.instance.getBaseURL()}${data!!.img}")
-//                            .into(imgIM)
-                    }else{
-
-                        val decodedString: ByteArray =
-                            Base64.decode(data?.img, Base64.DEFAULT)
-                        val decodedByte: Bitmap =
-                            BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-
-                        imgIM.setImageBitmap(decodedByte)
-
-                    }
-
-                }?: kotlin.run {
+//
 
 
-                    val decodedString: ByteArray =
-                        Base64.decode(data?.img, Base64.DEFAULT)
-                    val decodedByte: Bitmap =
-                        BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+                cancleAction.visibility = View.VISIBLE
+                cancleAction.setOnClickListener {
+                    listener.onItemClick(it, adapterPosition, Constant.ACTION_CLICKITEM_DEL)
+                }
 
-                    imgIM.setImageBitmap(decodedByte)
+                if (data?.eid!! == 0) {
+                    Glide.with(context).load(data!!.uri_img).into(imgIM)
 
+                } else {
+//                    Glide.with(context).load("${KeySK.instance.getBaseURL()}${data!!.path_img}").into(imgIM)
 
                 }
+//                data?.eid?.let {
+//                    Glide.with(context).load("").into(imgIM)
+//
+//                } ?: kotlin.run {
+//                    Glide.with(context).load(data!!.uri_img).into(imgIM)
+//
+//
+//                }
             }
-
         }
     }
 
-    inner class ViewHolderAdd(itemsView: View) : RecyclerView.ViewHolder(itemsView)
+    inner class ViewHolderAdd(itemsView: View) : RecyclerView.ViewHolder(itemsView) {
+        fun bind() {
+
+
+            itemView.apply {
+                setOnClickListener {
+                    Log.e("dwl;", "lwp")
+                    listener.onItemClick(it, adapterPosition, Constant.ACTION_CLICKITEM)
+
+                }
+
+            }
+
+        }
+
+
+    }
 }

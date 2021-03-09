@@ -90,7 +90,7 @@ class MainActivity : BaseActivity() {
 
 
             }).check()
-//        startService(Intent(this, LocationUpdateService::class.java))
+        startService(Intent(this, LocationUpdateService::class.java))
 //        startLocService()
 
     }

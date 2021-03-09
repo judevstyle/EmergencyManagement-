@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fragment_history_menu_bottom"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:orientation="vertical"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+
+    <TextView
+        android:id="@+id/menu_bottom_sheet_camera"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:drawablePadding="@dimen/dimen12"
+        android:drawableStart="@drawable/ic_baseline_photo_camera_24"
+        android:gravity="center_vertical"
+        android:padding="@dimen/dimen12"
+        android:text="ถ่ายภาพ" />
+
+    <TextView
+        android:id="@+id/menu_bottom_sheet_img"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:drawablePadding="@dimen/dimen12"
+        android:drawableStart="@drawable/ic_baseline_image_24"
+        android:gravity="center_vertical"
+        android:padding="@dimen/dimen12"
+        android:text="เลือกจากอัลบั้ม" />
+
+
+
+</LinearLayout>

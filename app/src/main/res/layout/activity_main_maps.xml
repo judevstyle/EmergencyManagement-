@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".view.activity.MainMapsActivity">
+
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_alignParentBottom="true">
+
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            app:pulse_color="@color/colorPrimary"
+            app:pulse_count="4"
+            app:pulse_duration="2000"
+            app:pulse_interpolator="Linear"
+            app:pulse_repeat="0"
+            app:pulse_startFromScratch="false"></pl.bclogic.pulsator4droid.library.PulsatorLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/actionWorning"
+            android:onClick="actionWorning"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/dimen12"
+            android:background="@drawable/round_button"
+            android:text="แจ้งเตือนภัย"
+            android:textColor="@color/white" />
+
+
+    </FrameLayout>
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen12"
+        app:cardCornerRadius="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen12"
+                android:layout_marginRight="@dimen/dimen12"
+                android:orientation="horizontal">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/menuImg"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_marginLeft="@dimen/dimen12"
+                    android:src="@drawable/ic_fire" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dimen12"
+                    android:orientation="vertical">
+
+                    <com.zine.ketotime.view.CustomTextView
+                        android:id="@+id/menuTitleTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="อาคาร B1 "
+                        android:textColor="@color/black"
+                        android:textSize="17sp" />
+
+                    <com.zine.ketotime.view.CustomTextView
+                        android:id="@+id/nameTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ห้องทดลอง 1 ไฟไหม้ ระเบิด"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+
+                    <com.zine.ketotime.view.CustomTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ตำแหน่ง : พนักงานขับรถ"
+                        android:textSize="12sp" />
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginTop="@dimen/dimen8"
+                android:background="@color/gray_soft" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen8"
+                android:orientation="vertical">
+
+                <com.zine.ketotime.view.CustomTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dimen12"
+                    android:text="ภาพประกอบ"
+                    android:textColor="@color/black" />
+
+
+            </LinearLayout>
+
+
+            <ImageView
+                android:id="@+id/imgIM"
+                android:visibility="gone"
+                android:src="@drawable/test_lab"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"/>
+            <View
+                android:id="@+id/actionShow"
+                android:onClick="actionShow"
+                android:backgroundTint="@color/colorPrimary"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:background="@drawable/ic_down_icon"/>
+
+            <View
+                android:id="@+id/actionHide"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:background="@drawable/ic_up_arrow"
+                android:backgroundTint="@color/colorPrimary"
+                android:onClick="actionHide"
+                android:paddingBottom="@dimen/dimen8"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+    <!--    <androidx.appcompat.widget.AppCompatButton-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="@dimen/higth_button"-->
+    <!--        android:background="@drawable/bg_input_button_primary"-->
+    <!--        android:textColor="@color/white"-->
+    <!--        android:layout_alignParentBottom="true"-->
+    <!--        android:layout_margin="@dimen/dimen12"-->
+    <!--        android:text="แจ้งเตือนภัย"/>-->
+
+
+</RelativeLayout>
