@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginLeft="@dimen/size_space_item"
+    android:layout_marginRight="@dimen/size_space_item"
+    android:layout_marginTop="@dimen/size_space_item"
+    app:cardElevation="6dp"
+    android:layout_height="wrap_content">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="60dp"
+                android:layout_margin="@dimen/size_space_item"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:id="@+id/avatarIM"
+                android:src="@drawable/ic_no_img"/>
+            <LinearLayout
+                android:layout_marginRight="@dimen/size_space_item"
+                android:layout_marginTop="@dimen/size_space_item"
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                >
+
+                <TextView
+                    android:id="@+id/nameTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="เจนจิรา ประสาทศรี"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/item_name"/>
+                <TextView
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:id="@+id/productTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="หลอกเอารูปวัวของคนอื่น มาโพสเปิดราคาขาย โดยใข้ชื่อเฟสบุ๊ค อะไรไม่รู่ ได้ยอดไปทั้งหมด 62000 บาท" />
+
+                <TextView
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:id="@+id/descTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="หลอกเอารูปวัวของคนอื่น มาโพสเปิดราคาขาย โดยใข้ชื่อเฟสบุ๊ค อะไรไม่รู่อะไรไม่รู่อะไรไม่รู่ ได้ยอดไปทั้งหมด 62000 บาท" />
+
+
+
+            </LinearLayout>
+
+
+
+
+        </LinearLayout>
+
+
+        <TextView
+            android:layout_marginBottom="@dimen/dimen12"
+            android:id="@+id/dateTV"
+            android:layout_marginRight="@dimen/size_space_item"
+            android:textColor="@color/colorPrimary"
+            android:layout_gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="ลงประกาศวันที่ 20/01/2021"/>
+
+    </LinearLayout>
+
+
+
+
+
+
+</androidx.cardview.widget.CardView>
