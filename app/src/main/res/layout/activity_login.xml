@@ -49,8 +49,9 @@
             android:paddingLeft="10dp"
             android:hint="User name"
             android:gravity="center"
-            android:id="@+id/codeET"
-            android:inputType="numberDecimal"
+            android:text="Yywyw8190"
+            android:id="@+id/usernameET"
+            android:inputType="text"
             android:layout_marginRight="20dp"
             android:layout_marginLeft="20dp"
             android:layout_width="match_parent"
@@ -60,6 +61,7 @@
 
 
         <EditText
+            android:text="111111"
             android:layout_marginTop="12dp"
             android:textColor="#fff"
             android:textColorHint="#eee"
@@ -68,7 +70,7 @@
             android:hint="Password"
             android:gravity="center"
             android:id="@+id/passET"
-            android:inputType="numberDecimal"
+            android:inputType="text"
             android:layout_marginRight="20dp"
             android:layout_marginLeft="20dp"
             android:layout_width="match_parent"

@@ -110,8 +110,9 @@
                 android:background="@drawable/bg_input_button_primary"
                 android:layout_width="match_parent"
                 android:textColor="@color/white"
+                android:onClick="actionCommit"
                 android:layout_height="@dimen/higth_button"
-                android:text="แจ้งเตือน"/>
+                android:text="ส่งแจ้ง"/>
 
 
 

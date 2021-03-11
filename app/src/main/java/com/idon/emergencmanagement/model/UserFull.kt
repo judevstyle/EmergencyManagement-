@@ -10,5 +10,8 @@ data class UserFull(
     var display_name: String,
     var avatar: String,
     var gender:String?,
-    var tel:String?
+    var fname: String?,
+    var lname: String?,
+    var tel:String?,
+    var comp_id:String?
 ) : Parcelable

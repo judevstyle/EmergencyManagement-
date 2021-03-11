@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.idon.emergencmanagement.view.activity.AlermActivity
 
 
 class LocationUpdateService : Service() {
@@ -35,6 +36,7 @@ class LocationUpdateService : Service() {
     private var mLocationManager: LocationManager? = null
     private val LOCATION_INTERVAL = 1000
     private val LOCATION_DISTANCE = 10f
+    var context:Context? = null
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -85,9 +87,15 @@ class LocationUpdateService : Service() {
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
-                startLocationUpdates()
 
-                Toast.makeText(baseContext,"dkwodlll",Toast.LENGTH_SHORT).show()
+
+                val dialogIntent =
+                    Intent(this@LocationUpdateService, AlermActivity::class.java)
+                dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(dialogIntent)
+               // Toast.makeText(baseContext,"dkwodlll",Toast.LENGTH_SHORT).show()
+
+
 
                 Log.e("dlpwld","dlwp")
 
@@ -109,6 +117,9 @@ class LocationUpdateService : Service() {
         mFusedLocationClient =
             LocationServices.getFusedLocationProviderClient(baseContext)
     }
+
+
+
 
     private fun initializeLocationManager() {
 
@@ -171,6 +182,7 @@ class LocationUpdateService : Service() {
                 "Locations",
                 currentLocation.getLatitude().toString() + "," + currentLocation.getLongitude()
             )
+
 
             Toast.makeText(baseContext,"${currentLocation.getLatitude().toString() + "," + currentLocation.getLongitude()}",Toast.LENGTH_SHORT).show()
             //Share/Publish Location

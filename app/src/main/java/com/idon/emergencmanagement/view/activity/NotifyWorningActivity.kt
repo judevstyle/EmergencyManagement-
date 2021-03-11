@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -36,8 +37,12 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.gson.Gson
 import com.idon.emergencmanagement.R
 import com.idon.emergencmanagement.model.ImageWorningImg
+import com.idon.emergencmanagement.model.ResponeDao
+import com.idon.emergencmanagement.model.UserFull
+import com.idon.emergencmanagement.model.WorningDataItem
 import com.idon.emergencmanagement.util.FileUtil
 import com.idon.emergencmanagement.view.adapter.ImageAdapter
 import com.karumi.dexter.Dexter
@@ -48,12 +53,20 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.panuphong.smssender.helper.HandleClickListener
 import com.tt.workfinders.BaseClass.BaseActivity
+import com.zine.ketotime.network.HttpMainConnect
 import com.zine.ketotime.util.Constant
 import id.zelory.compressor.Compressor
+import kotlinx.android.synthetic.main.activity_notify_worning.*
 import kotlinx.android.synthetic.main.fragment_notify_worning.*
+import kotlinx.android.synthetic.main.fragment_notify_worning.cv_evidence
+import kotlinx.android.synthetic.main.fragment_notify_worning.descET
+import kotlinx.android.synthetic.main.fragment_notify_worning.topicET
 import kotlinx.android.synthetic.main.toolbar_title.*
 import kotlinx.coroutines.launch
 import org.parceler.Parcels
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -61,6 +74,8 @@ import java.io.IOException
 
 class NotifyWorningActivity : BaseActivity(), HandleClickListener, OnMapReadyCallback {
 
+    lateinit var user: UserFull
+    lateinit var spf: SharedPreferences
     private var providerFile: Uri? = null
     private var mGoogleMap: GoogleMap? = null
     private lateinit var adapters: ImageAdapter
@@ -80,7 +95,9 @@ class NotifyWorningActivity : BaseActivity(), HandleClickListener, OnMapReadyCal
 
     override fun onViewReady(savedInstanceState: Bundle?, intent: Intent?) {
         super.onViewReady(savedInstanceState, intent)
-
+        spf = getSharedPreferences(Constant._PREFERENCES_NAME, Context.MODE_PRIVATE)
+        val gson = Gson()
+        user = gson.fromJson(spf.getString(Constant._UDATA, "{}"), UserFull::class.java)
         toolbar.title = "แจ้งเตือนภัย"
         setSupportActionBar(toolbar)
         showBackArrow()
@@ -476,6 +493,53 @@ class NotifyWorningActivity : BaseActivity(), HandleClickListener, OnMapReadyCal
         val directoryStorage = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(fileName, ".jpg", directoryStorage)
     }
+
+    fun actionCommit(view: View) {
+
+
+
+
+
+        val worningDataItem = WorningDataItem(
+            "",adapters.items,location!!.latitude,location!!.longitude
+        ,user,"${descET.text}","${topicET.text}",null
+        )
+        HttpMainConnect()
+            .getApiService()
+            .woring(worningDataItem)
+            .enqueue(Callinsert())
+
+
+
+    }
+
+    inner class Callinsert : Callback<ResponeDao> {
+
+        init {
+            showProgressDialog()
+        }
+
+        override fun onFailure(call: Call<ResponeDao>, t: Throwable) {
+            hideDialog()
+            showToast("err1")
+
+            Log.e("dd","${t.message}")
+        }
+
+        override fun onResponse(call: Call<ResponeDao>, response: Response<ResponeDao>) {
+            hideDialog()
+            Log.e("dd","${response.body()!!.msg}")
+
+            if (response.isSuccessful){
+                finish()
+
+            }else
+                showToast("err")
+        }
+
+
+    }
+
 
 
 }

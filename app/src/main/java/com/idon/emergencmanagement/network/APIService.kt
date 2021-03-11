@@ -1,9 +1,10 @@
 package com.zine.ketotime.network
 
+import androidx.room.Embedded
+import com.idon.emergencmanagement.model.*
 import com.shin.tmsuser.model.maps.Directions
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.*
 
 
 interface APIService {
@@ -22,6 +23,62 @@ interface APIService {
         @Query("destination") destination: String,
         @Query("key") key: String
     ): Call<Directions>
+
+
+    @GET("load_request_worning.php")
+    fun getRequest(
+    ): Call<WorningData>
+
+
+    @GET("load_accept_woring.php")
+    fun getAccept(
+    ): Call<WorningData>
+
+    @GET("load_comp.php")
+    fun company(
+        @Query("comp_id") compId:String
+    ): Call<CompanyData>
+
+
+    @POST("register.php")
+    fun register(
+        @Body user:User
+    ): Call<ResponeUserDao>
+
+
+    @POST("m_worning.php")
+    fun woring(
+        @Body data:WorningDataItem
+    ): Call<ResponeDao>
+
+
+    @FormUrlEncoded
+    @POST("check_user.php")
+    fun checkUser(
+        @Field("username") user:String,
+        @Field("password") password:String
+
+    ): Call<ResponeUserDao>
+
+
+
+    @POST("update_user.php")
+    fun updateUser(
+        @Body user:UserFull
+    ): Call<ResponeUserDao>
+
+
+
+
+
+//    @POST("update_user.php")
+//    fun updateUser(
+//        @Body user:UserFull
+//    ): Call<ResponeUserDao>
+
+
+
+
 
 
 //

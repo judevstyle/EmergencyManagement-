@@ -7,7 +7,10 @@
     tools:context=".view.activity.MainMapsActivity">
 
 
+    <include layout="@layout/toolbar_title"/>
+
     <fragment
+        android:layout_marginTop="46dp"
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
@@ -47,6 +50,8 @@
 
 
     <androidx.cardview.widget.CardView
+        android:visibility="gone"
+        android:id="@+id/boxWorn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dimen12"
@@ -64,12 +69,28 @@
                 android:layout_marginRight="@dimen/dimen12"
                 android:orientation="horizontal">
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/menuImg"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_marginLeft="@dimen/dimen12"
-                    android:src="@drawable/ic_fire" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/avatarImg"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:layout_marginLeft="@dimen/dimen12"
+                        android:src="@drawable/ic_fire" />
+                    <TextView
+                        android:layout_marginLeft="8dp"
+                        android:textSize="10sp"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ผู้รายงาน"/>
+
+                </LinearLayout>
+
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -78,7 +99,7 @@
                     android:orientation="vertical">
 
                     <com.zine.ketotime.view.CustomTextView
-                        android:id="@+id/menuTitleTV"
+                        android:id="@+id/nameTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="อาคาร B1 "
@@ -86,7 +107,7 @@
                         android:textSize="17sp" />
 
                     <com.zine.ketotime.view.CustomTextView
-                        android:id="@+id/nameTV"
+                        android:id="@+id/topicTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="ห้องทดลอง 1 ไฟไหม้ ระเบิด"
@@ -96,7 +117,7 @@
                     <com.zine.ketotime.view.CustomTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ตำแหน่ง : พนักงานขับรถ"
+                        android:id="@+id/descTV"
                         android:textSize="12sp" />
 
 
@@ -159,7 +180,15 @@
 
 
     </androidx.cardview.widget.CardView>
-
+    <com.github.angads25.toggle.widget.LabeledSwitch
+        android:id="@+id/switchStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:textSize="14sp"
+        app:on="false"
+        android:layout_alignParentBottom="true"
+        app:colorBorder="@color/colorAccent"/>
     <!--    <androidx.appcompat.widget.AppCompatButton-->
     <!--        android:layout_width="match_parent"-->
     <!--        android:layout_height="@dimen/higth_button"-->

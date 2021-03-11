@@ -1,11 +1,14 @@
 package com.idon.emergencmanagement.view.activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.RadioButton
@@ -13,12 +16,17 @@ import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
 import com.idon.emergencmanagement.R
 import com.idon.emergencmanagement.model.ResponeUserDao
+import com.idon.emergencmanagement.model.User
 import com.idon.emergencmanagement.model.UserFull
 import com.idon.emergencmanagement.util.FileUtil
 import com.tt.workfinders.BaseClass.BaseActivity
 import com.yalantis.ucrop.UCrop
+import com.zine.ketotime.network.HttpMainConnect
+import com.zine.ketotime.util.Constant._PREFERENCES_NAME
+import com.zine.ketotime.util.Constant._UDATA
 import id.zelory.compressor.Compressor
 import kotlinx.android.synthetic.main.activity_register.*
 import kotlinx.android.synthetic.main.toolbar_title.*
@@ -29,9 +37,12 @@ import retrofit2.Response
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class RegisterActivity : BaseActivity() {
 
+    lateinit var spf: SharedPreferences
     var gendar: String = ""
     lateinit var user: UserFull
 
@@ -49,6 +60,7 @@ class RegisterActivity : BaseActivity() {
     override fun onViewReady(savedInstanceState: Bundle?, intent: Intent?) {
         super.onViewReady(savedInstanceState, intent)
 
+        spf = getSharedPreferences(_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
 
         toolbar.title = "จัดการข้อมูลส่วนตัว"
@@ -112,10 +124,28 @@ class RegisterActivity : BaseActivity() {
         } else if (telET.text.toString().length < 1) {
             showToast("กรุณาระบุเบอร์มือถือ")
             return
-        } else if (userET.text.toString().length < 1) {
-            showToast("กรุณาระบุ Email")
-            return
         }
+
+
+        val str = userET.text.toString()
+        Log.e("dd", "${Character.isUpperCase(str[0])} ${countNumbers(str)}")
+
+        var ck = false
+        if (userET.text.toString().length < 7) {
+            ck = true
+        } else if (!Character.isUpperCase(str[0]))
+            ck = true
+        else if (countNumbers(str) < 2)
+            ck = true
+
+        if (ck) {
+            showToast("ตรวจสอบ formate Username")
+            return
+
+        }
+
+
+
 
 
         if (passET.text.toString().length > 5 && passCFET.text.toString().length > 5) {
@@ -133,18 +163,43 @@ class RegisterActivity : BaseActivity() {
                 applicationContext
                 , "รหัสผ่านไม่ตรง", Toast.LENGTH_SHORT
             ).show()
-        } else Toast.makeText(
-            applicationContext
-            , "รหัสผ่านต้องมีความยาวมากกว่า 6 ตัว", Toast.LENGTH_SHORT
-        ).show()
+        } else
+            Toast.makeText(
+                applicationContext
+                , "รหัสผ่านต้องมีความยาวมากกว่า 6 ตัว", Toast.LENGTH_SHORT
+            ).show()
+
+    }
 
 
+    fun countNumbers(str: String): Int {
+
+        var count = 0
+        val pattern = Pattern.compile("[0-9]")
+        val matcher = pattern.matcher(str)
+        while (matcher.find()) {
+            count++
+        }
+        return count
     }
 
 
     fun Register(user: String, pass: String) {
 
         showProgressDialog()
+
+        val user = User(
+            "${user}",
+            "${pass}",
+            "${img}",
+
+            "${displayNameET.text}",
+            "${gendar}",
+            "",
+            "",
+            0
+        )
+        HttpMainConnect().getApiService().register(user).enqueue(InsertData())
 
     }
 
@@ -165,9 +220,26 @@ class RegisterActivity : BaseActivity() {
 
             if (response.isSuccessful) {
 
-                response.body()?.user?.let {
 
-                }
+                if (response.body()!!.status == 0) {
+
+                    hideDialog()
+                    showToast("${response.body()!!.msg}")
+
+                } else
+                    response.body()?.user?.let {
+                        val gson = Gson()
+                        val json = gson.toJson(it)
+                        val edit = spf.edit()
+                        edit.putString("${_UDATA}", "${json}")
+                        edit.commit()
+
+                        val intent = Intent(this@RegisterActivity, MainMapsActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+
+                    }
 
             } else {
                 hideDialog()
