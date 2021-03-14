@@ -6,8 +6,8 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class ImageWorningImg(
-    var eid: Int? = null,
-    var path_img: String,
+    var seq: Int? = 0,
+    var img: String?,
     var base64_img: String?,
     var uri_img: Uri?,
     var img_del: Int = 0

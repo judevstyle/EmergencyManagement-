@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="colorPrimary">#FF5722</color>
 
+    <color name="primary_soft">#F5F9FB</color>
 
     <color name="gray700">#999999</color>
     <color name="colorPrimarySoft">#6A6200EE</color>

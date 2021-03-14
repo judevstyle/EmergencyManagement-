@@ -21,6 +21,7 @@ import com.google.android.gms.location.LocationServices
 import com.idon.emergencmanagement.service.LocationService
 import com.idon.emergencmanagement.service.LocationUpdateService
 import com.idon.emergencmanagement.service.MyLocationService
+import com.idon.emergencmanagement.service.UpdateWorningService
 import com.idon.emergencmanagement.view.activity.TestActivity
 import com.idon.emergencmanagement.viewmodel.LocationViewmodel
 import com.karumi.dexter.Dexter
@@ -90,7 +91,7 @@ class MainActivity : BaseActivity() {
 
 
             }).check()
-        startService(Intent(this, LocationUpdateService::class.java))
+        startService(Intent(this, UpdateWorningService::class.java))
 //        startLocService()
 
     }

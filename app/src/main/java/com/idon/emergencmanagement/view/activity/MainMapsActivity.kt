@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.os.Build
 import android.os.Bundle
@@ -36,36 +37,47 @@ import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.idon.emergencmanagement.R
 import com.idon.emergencmanagement.helper.DisplayUtility
-import com.idon.emergencmanagement.model.CompanyData
-import com.idon.emergencmanagement.model.UserFull
-import com.idon.emergencmanagement.model.WorningData
-import com.idon.emergencmanagement.model.WorningDataItem
+import com.idon.emergencmanagement.model.*
 import com.idon.emergencmanagement.service.LocationUpdateService
 import com.idon.emergencmanagement.service.MyLocationService
+import com.idon.emergencmanagement.service.UpdateWorningService
+import com.idon.emergencmanagement.view.adapter.SliderAdapter
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import com.panuphong.smssender.helper.HandleClickListener
 import com.shin.tmsuser.model.maps.Directions
 import com.shin.tmsuser.model.maps.Route
+import com.smarteist.autoimageslider.SliderAnimations
+import com.smarteist.autoimageslider.SliderView
+import com.stfalcon.frescoimageviewer.ImageViewer
 import com.tt.workfinders.BaseClass.BaseActivity
 import com.zine.ketotime.network.HttpMainConnect
 import com.zine.ketotime.network.HttpMapsConnect
 import com.zine.ketotime.util.Constant
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_main_maps.*
 import kotlinx.android.synthetic.main.fragment_main.actionHide
 import kotlinx.android.synthetic.main.fragment_main.actionShow
 import kotlinx.android.synthetic.main.fragment_main.imgIM
 import kotlinx.android.synthetic.main.fragment_main.pulsator
+import kotlinx.android.synthetic.main.toolbar_title.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylineClickListener, GoogleMap.OnMarkerClickListener,
-    GoogleMap.OnPolygonClickListener {
+    GoogleMap.OnPolygonClickListener,HandleClickListener {
+     var data: WorningDataItem? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var adapter: SliderAdapter
 
     lateinit var spf: SharedPreferences
     private var mRouteMarkerList = ArrayList<Marker>()
@@ -76,6 +88,8 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
     lateinit var user: UserFull
     lateinit var companyData: CompanyData
     lateinit var database: FirebaseDatabase
+
+
     lateinit var myRef: DatabaseReference
     override fun getContentView(): Int {
 
@@ -86,23 +100,55 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
     override fun onViewReady(savedInstanceState: Bundle?, intent: Intent?) {
         super.onViewReady(savedInstanceState, intent)
+
+        toolbar.title = "Home"
+        setSupportActionBar(toolbar)
+        adapter = SliderAdapter(this, this)
+        imageSlider.setSliderAdapter(adapter)
         spf = getSharedPreferences(Constant._PREFERENCES_NAME, Context.MODE_PRIVATE)
         val gson = Gson()
         user = gson.fromJson(spf.getString(Constant._UDATA, "{}"), UserFull::class.java)
         database = Firebase.database
+
+        myRef = database.getReference().child("worning")
+
+        myRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {
+
+
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val edit = spf.edit()
+
+                val size = snapshot.getChildrenCount()
+                edit.putInt("count",size.toInt()).commit()
+
+            }
+        })
+
         myRef = database.getReference().child("warning_list")
-        val service = Intent(this@MainMapsActivity, LocationUpdateService::class.java)
+        val service = Intent(this@MainMapsActivity, UpdateWorningService::class.java)
+        startService(service)
+
+
+        val serviceTracking = Intent(this@MainMapsActivity, LocationUpdateService::class.java)
+
+        switchStatus.isClickable = spf.getBoolean("status",false)
         switchStatus.setOnToggledListener(object : OnToggledListener {
 
 
             override fun onSwitched(toggleableView: ToggleableView?, isOn: Boolean) {
+                val edit = spf.edit()
 
                 when (isOn) {
                     true -> {
-                        startService(service)
+                        edit.putBoolean("status",true).commit()
+                        startService(serviceTracking)
                     }
                     else -> {
-                        stopService(service)
+                        edit.putBoolean("status",false).commit()
+                        stopService(serviceTracking)
                     }
 
                 }
@@ -144,17 +190,45 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
 
     }
+    val sliderItemListURL: ArrayList<String> = ArrayList()
+    val sliderItemList: ArrayList<SliderItem> = ArrayList()
 
     fun actionShow(view: View) {
 
-        imgIM.visibility = View.VISIBLE
+        imageSlider.visibility = View.VISIBLE
         actionHide.visibility = View.VISIBLE
         actionShow.visibility = View.GONE
+
+
+//        imageSlider.setIndicatorAnimation(IndicatorAnimations.THIN_WORM); //set indicator animation by using SliderLayout.IndicatorAnimations. :WORM or THIN_WORM or COLOR or DROP or FILL or NONE or SCALE or SCALE_DOWN or SLIDE and SWAP!!
+        imageSlider.setSliderTransformAnimation(SliderAnimations.SIMPLETRANSFORMATION)
+        imageSlider.setAutoCycleDirection(SliderView.AUTO_CYCLE_DIRECTION_RIGHT)
+//        imageSlider.setIndicatorSelectedColor(Color.WHITE)
+//        imageSlider.setIndicatorUnselectedColor(Color.GRAY)
+        imageSlider.setScrollTimeInSec(3)
+
+        //dummy data
+
+        sliderItemListURL.clear()
+        sliderItemList.clear()
+
+        for (values in data!!.img!!) {
+            val sliderItem = SliderItem()
+            sliderItem.setDescription("Slider Item ")
+            sliderItemListURL.add("${Constant.BASE_URL}${values.img}")
+            sliderItem.setImageUrl("${Constant.BASE_URL}${values.img}")
+            sliderItemList.add(sliderItem)
+
+
+
+        }
+        adapter.addItem(sliderItemList)
+        adapter.notifyDataSetChanged()
 
     }
 
     fun actionHide(view: View) {
-        imgIM.visibility = View.GONE
+        imageSlider.visibility = View.GONE
         actionHide.visibility = View.GONE
         actionShow.visibility = View.VISIBLE
     }
@@ -242,6 +316,28 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
                 R.layout.custom_marker_layout,
                 null
             )
+
+
+        val markerImv = marker.findViewById<CircleImageView>(R.id.imgIM)
+//        val nameTV = marker.findViewById<CustomTextView>(R.id.nameTV)
+
+//        markerImv.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
+
+        Log.e("ldld","pppppp")
+//        nameTV.text = "${user.display_name}"
+        Log.e("img","${Constant.BASE_URL}${user.avatar}")
+//        Glide.with(this).load("${Constant.BASE_URL}${user.avatar}").into(markerImv);
+        Glide.with(this).load("https://lh3.googleusercontent.com/ogw/ADGmqu94yitecg8ytqn_PvyyuJt0RwW_97zVtBuKaX1TRA=s192-c-mo").into(markerImv);
+//        val url = URL("https://lh3.googleusercontent.com/ogw/ADGmqu94yitecg8ytqn_PvyyuJt0RwW_97zVtBuKaX1TRA=s192-c-mo")
+
+
+
+
+//        val bitmap1: Bitmap =
+//            BitmapFactory.decodeStream(url.openConnection().getInputStream())
+//        markerImv.setImageBitmap(getBitmapFromURL("https://lh3.googleusercontent.com/ogw/ADGmqu94yitecg8ytqn_PvyyuJt0RwW_97zVtBuKaX1TRA=s192-c-mo"))
+
+        //https://lh3.googleusercontent.com/ogw/ADGmqu94yitecg8ytqn_PvyyuJt0RwW_97zVtBuKaX1TRA=s192-c-mo
         //        markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
 
         //        Glide.with(this).load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s").into(markerImage);
@@ -261,6 +357,26 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
         return bitmap
     }
 
+
+    fun getBitmapFromURL(src: String): Bitmap? {
+        return try {
+            Log.e("src", src!!)
+            val url = URL(src)
+            val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+            connection.setDoInput(true)
+            connection.connect()
+            val input: InputStream = connection.getInputStream()
+            val myBitmap =
+                BitmapFactory.decodeStream(input)
+            Log.e("Bitmap", "returned")
+            myBitmap
+        } catch (e: IOException) {
+            e.printStackTrace()
+//            Log.e("Exception", e.message?)
+            null
+        }
+    }
+
     fun createCustomMarkerShop(
         context: Context,
         @DrawableRes resource: Int,
@@ -271,10 +387,11 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
                 R.layout.custom_marker_layout_shop,
                 null
             )
-        //        markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
 
-        //        Glide.with(this).load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s").into(markerImage);
-        val displayMetrics = DisplayMetrics()
+
+
+
+         val displayMetrics = DisplayMetrics()
         (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
         marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
         marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
@@ -323,7 +440,6 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 //100.539393
 
     fun setMarkersAndRoute(route: Route) {
-
 
         val startLatLng = LatLng(route.startLat!!, route.startLng!!)
         val startMarkerOptions: MarkerOptions =
@@ -594,19 +710,28 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
     override fun onMarkerClick(marker: Marker?): Boolean {
 
-
         try {
-            val data = marker?.tag as WorningDataItem
-            Log.e("d;w","${data.w_topic}")
-
-            nameTV.text = "${data.user!!.display_name}"
-            topicTV.text = "${data.w_topic}"
-            descTV.text = "${data.w_desc}"
-            Glide.with(this).load("${Constant.BASE_URL}${data.user!!.avatar}").into(avatarImg)
+            data = marker?.tag as WorningDataItem
+            nameTV.text = "${data?.user!!.display_name}"
+            topicTV.text = "${data?.w_topic}"
+            descTV.text = "${data?.w_desc}"
+            Glide.with(this).load("${Constant.BASE_URL}${data?.user!!.avatar}").into(avatarImg)
             boxWorn.visibility = View.VISIBLE
+//            imageSlider.visibility = View.GONE
+            actionHide(actionHide)
+
         }catch (ex:TypeCastException){}
 
         return true
+
+    }
+
+    override fun onItemClick(view: View, position: Int, action: Int) {
+
+
+        ImageViewer.Builder(this, sliderItemListURL)
+            .setStartPosition(position)
+            .show()
 
     }
 

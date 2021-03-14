@@ -21,6 +21,7 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:paddingRight="@dimen/dimen4"
+            android:id="@+id/nameTV"
             android:layout_gravity="center"
             android:text="Me" />
         <RelativeLayout
@@ -33,7 +34,7 @@
 
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/user_dp"
+                android:id="@+id/imgIM"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:layout_marginRight="@dimen/dimen8"
@@ -42,7 +43,6 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginLeft="9dp"
                 android:contentDescription="@null"
-                android:src="@drawable/test_user"
                 app:civ_border_color="#fff" />
         </RelativeLayout>
 

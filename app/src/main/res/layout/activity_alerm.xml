@@ -1,9 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".view.activity.AlermActivity">
 
 
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_gravity="center"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:src="@drawable/siren"/>
+
+        <TextView
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/dimen12"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="แจ้งเตือนภัย"/>
+        <com.zine.ketotime.view.CustomButton
+            android:paddingLeft="@dimen/dimen12"
+            android:paddingRight="@dimen/dimen12"
+            android:textSize="18sp"
+            android:onClick="actionPage"
+            android:textColor="@color/white"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_input_button_primary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="เข้าสู่หน้าเตือนภัย" />
+
+    </LinearLayout>
+
+
+
+</RelativeLayout>

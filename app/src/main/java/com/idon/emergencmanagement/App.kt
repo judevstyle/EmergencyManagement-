@@ -1,6 +1,7 @@
 package com.panuphong.smssender
 
 import android.app.Application
+import com.facebook.drawee.backends.pipeline.Fresco
 import com.idon.emergencmanagement.viewmodel.LocationViewmodel
 import com.panuphong.smssender.repository.TaskRespt
 import com.panuphong.smssender.viewmodel.TaskViewModel
@@ -15,6 +16,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Fresco.initialize(this)
 
 
         initCoin()

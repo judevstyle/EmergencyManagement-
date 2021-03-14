@@ -11,17 +11,21 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.idon.emergencmanagement.R
-import com.idon.emergencmanagement.model.ImageWorningImg
+import com.idon.emergencmanagement.model.WorningDataItem
 import com.panuphong.smssender.helper.HandleClickListener
 import com.zine.ketotime.util.Constant
 import kotlinx.android.synthetic.main.item_img.view.*
+import kotlinx.android.synthetic.main.item_worning.view.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class WorningRequestAdapter(
     context: Context, val listener: HandleClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
-    var items: ArrayList<ImageWorningImg>? = null
+    var items: ArrayList<WorningDataItem>? = null
 
     init {
         this.items = ArrayList()
@@ -49,7 +53,7 @@ class WorningRequestAdapter(
     }
 
 
-    fun getItem(position: Int): ImageWorningImg {
+    fun getItem(position: Int): WorningDataItem {
         return items!!.get(position)!!
     }
 
@@ -61,14 +65,16 @@ class WorningRequestAdapter(
         return 0
     }
 
-    fun setItem(items: ImageWorningImg) {
+    fun setItem(items: ArrayList<WorningDataItem>) {
         if (this.items == null)
             this.items = ArrayList()
-        this.items!!.add(items)
+
+        this.items?.clear()
+        this.items!!.addAll(items)
         notifyDataSetChanged()
     }
 
-    fun getData(): ArrayList<ImageWorningImg> {
+    fun getData(): ArrayList<WorningDataItem> {
         return items!!
     }
 
@@ -84,7 +90,7 @@ class WorningRequestAdapter(
 
             if (holder is ViewHolder) {
 
-                holder.bind(items!![position-1])
+                holder.bind(items!![position])
                 holder.itemView.setOnClickListener {
                     listener.onItemClick(
                         holder.itemView,
@@ -100,35 +106,27 @@ class WorningRequestAdapter(
 
 
     inner class ViewHolder(itemsView: View) : RecyclerView.ViewHolder(itemsView) {
-
-        fun bind(data: ImageWorningImg?) {
+        val NEW_FORMAT = "dd/MM/yyyy HH:mm"
+        val OLD_FORMAT  = "yyyy-MM-dd HH:mm:ss"
+        fun bind(data: WorningDataItem?) {
 //            val dec = DecimalFormat("#,###.00")
 
             itemView.apply {
 
-//
+                val oldDateString = "${data?.date_create}"
+                val newDateString: String
+
+                val sdf = SimpleDateFormat(OLD_FORMAT)
+                val d: Date = sdf.parse(oldDateString)
+                sdf.applyPattern(NEW_FORMAT)
+                newDateString = sdf.format(d)
+                dateTV.text = "ลงประกาศวันที่ ${newDateString}"
+                nameTV.text = "ผู้รายงาน : ${data!!.user?.display_name}"
+                topicTV.text = "${data.w_topic}"
+                descTV.text = "${data.w_desc}"
+                Glide.with(this).load("${Constant.BASE_URL}${data.user!!.avatar}").into(avatarIM)
 
 
-                cancleAction.visibility = View.VISIBLE
-                cancleAction.setOnClickListener {
-                    listener.onItemClick(it, adapterPosition, Constant.ACTION_CLICKITEM_DEL)
-                }
-
-                if (data?.eid!! == 0) {
-                    Glide.with(context).load(data!!.uri_img).into(imgIM)
-
-                } else {
-//                    Glide.with(context).load("${KeySK.instance.getBaseURL()}${data!!.path_img}").into(imgIM)
-
-                }
-//                data?.eid?.let {
-//                    Glide.with(context).load("").into(imgIM)
-//
-//                } ?: kotlin.run {
-//                    Glide.with(context).load(data!!.uri_img).into(imgIM)
-//
-//
-//                }
             }
         }
     }

@@ -50,7 +50,7 @@
 
 
     <androidx.cardview.widget.CardView
-        android:visibility="gone"
+        android:visibility="visible"
         android:id="@+id/boxWorn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -150,12 +150,33 @@
             </LinearLayout>
 
 
-            <ImageView
-                android:id="@+id/imgIM"
+
+            <com.smarteist.autoimageslider.SliderView
+                android:id="@+id/imageSlider"
                 android:visibility="gone"
-                android:src="@drawable/test_lab"
+
                 android:layout_width="match_parent"
-                android:layout_height="240dp"/>
+                android:layout_height="240dp"
+                app:sliderAnimationDuration="600"
+                app:sliderAutoCycleDirection="back_and_forth"
+                app:sliderAutoCycleEnabled="true"
+                app:sliderIndicatorAnimationDuration="600"
+                app:sliderIndicatorGravity="center_horizontal|bottom"
+                app:sliderIndicatorMargin="15dp"
+                app:sliderIndicatorOrientation="horizontal"
+                app:sliderIndicatorPadding="3dp"
+                app:sliderIndicatorRadius="2dp"
+                app:sliderIndicatorSelectedColor="@color/colorPrimary"
+                app:sliderIndicatorUnselectedColor="@color/colorPrimarySoft"
+                app:sliderScrollTimeInSec="1"
+                app:sliderStartAutoCycle="true" />
+
+<!--            <ImageView-->
+<!--                android:id="@+id/imgIM"-->
+<!--                android:visibility="gone"-->
+<!--                android:src="@drawable/test_lab"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="240dp"/>-->
             <View
                 android:id="@+id/actionShow"
                 android:onClick="actionShow"

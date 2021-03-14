@@ -46,6 +46,16 @@
 
 
         </service>
+
+        <service
+            android:name=".service.UpdateWorningService"
+            android:enabled="true"
+            android:foregroundServiceType="location"
+            android:stopWithTask="false">
+
+
+        </service>
+
         <service android:name=".service.LocationService" />
 
 
@@ -61,8 +71,12 @@
         <activity android:name=".view.activity.MainMapsActivity" />
         <activity android:name=".view.activity.NotifyWorningActivity" />
         <activity android:name=".view.activity.SelectMapsActivity" />
+        <activity android:name=".view.activity.MenuApproveActivity"/>
+        <activity android:name=".view.activity.WorningRequestActivity"/>
         <activity android:name=".view.activity.RegisterActivity"/>
+        <activity android:name=".view.activity.WorningRequestDescActivity"/>
 
+        <activity android:name=".view.activity.MapsCheckIn"/>
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"

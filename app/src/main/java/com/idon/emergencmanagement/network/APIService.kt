@@ -60,6 +60,14 @@ interface APIService {
 
     ): Call<ResponeUserDao>
 
+    @FormUrlEncoded
+    @POST("update_status_worning.php")
+    fun updateStatus(
+        @Field("uid") uid:String,
+        @Field("wid") wis:String,
+        @Field("status") status:Int
+    ): Call<ResponeDao>
+
 
 
     @POST("update_user.php")

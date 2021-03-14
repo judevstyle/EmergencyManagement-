@@ -131,7 +131,7 @@ class ImageAdapter(
                     listener.onItemClick(it, adapterPosition, Constant.ACTION_CLICKITEM_DEL)
                 }
 
-                if (data?.eid!! == 0) {
+                if (data?.seq!! == 0) {
                     Glide.with(context).load(data!!.uri_img).into(imgIM)
 
                 } else {

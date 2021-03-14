@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+
         <LinearLayout
 
             android:layout_width="match_parent"
@@ -43,13 +44,17 @@
                     android:text="เจนจิรา ประสาทศรี"
                     android:textStyle="bold"
                     android:textSize="@dimen/item_name"/>
+
                 <TextView
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:id="@+id/productTV"
+                    android:id="@+id/topicTV"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="หลอกเอารูปวัวของคนอื่น มาโพสเปิดราคาขาย โดยใข้ชื่อเฟสบุ๊ค อะไรไม่รู่ ได้ยอดไปทั้งหมด 62000 บาท" />
+
 
                 <TextView
                     android:ellipsize="end"

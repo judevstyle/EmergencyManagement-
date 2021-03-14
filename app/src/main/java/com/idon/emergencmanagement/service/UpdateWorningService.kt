@@ -13,28 +13,23 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import com.google.gson.Gson
-import com.idon.emergencmanagement.model.UserFull
 import com.idon.emergencmanagement.view.activity.AlermActivity
 import com.zine.ketotime.util.Constant
 
 
-class LocationUpdateService : Service() {
+class UpdateWorningService : Service() {
 
-    private lateinit var myRefLocation: DatabaseReference
-    lateinit var user: UserFull
     lateinit var spf: SharedPreferences
     var wakelock: PowerManager.WakeLock? = null
-
     //region data
     private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 3000
     private var mFusedLocationClient: FusedLocationProviderClient? = null
@@ -44,9 +39,7 @@ class LocationUpdateService : Service() {
     private var mLocationManager: LocationManager? = null
     private val LOCATION_INTERVAL = 1000
     private val LOCATION_DISTANCE = 10f
-    var context: Context? = null
-
-
+    var context:Context? = null
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -54,11 +47,8 @@ class LocationUpdateService : Service() {
     //onCreate
     override fun onCreate() {
         super.onCreate()
-
-
         spf = getSharedPreferences(Constant._PREFERENCES_NAME, Context.MODE_PRIVATE)
-        val gson = Gson()
-        user = gson.fromJson(spf.getString(Constant._UDATA, "{}"), UserFull::class.java)
+
 //        while(true){
 ////            Timer("SettingUp").schedule(5000) {
 ////                Log.e("dldl","ssss")
@@ -92,9 +82,8 @@ class LocationUpdateService : Service() {
 
         val database = Firebase.database
         val myRef = database.getReference().child("worning")
-        myRefLocation = database.getReference().child("location")
 
-        myRef.addValueEventListener(object : ValueEventListener {
+        myRef.addValueEventListener(object : ValueEventListener{
             override fun onCancelled(error: DatabaseError) {
 
 
@@ -108,22 +97,23 @@ class LocationUpdateService : Service() {
 
 
 
-                Log.e("num", "${spf.getInt("count", 0)} ,${size.toInt()} ")
+                Log.e("num","${spf.getInt("count",0) } ,${ size.toInt()} ")
 
-                if (spf.getInt("count", 0) != size.toInt() && size.toInt() != 0) {
+                if (spf.getInt("count",0) != size.toInt() && size.toInt() != 0){
 
                     val dialogIntent =
-                        Intent(this@LocationUpdateService, AlermActivity::class.java)
+                        Intent(this@UpdateWorningService, AlermActivity::class.java)
                     dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(dialogIntent)
 
-                    edit.putInt("count", size.toInt()).commit()
+                    edit.putInt("count",size.toInt()).commit()
 
                 }
 //                Log.e("dlpwld","dlwp ${size}")
 
             }
         })
+
 
 
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -141,6 +131,8 @@ class LocationUpdateService : Service() {
     }
 
 
+
+
     private fun initializeLocationManager() {
 
         if (mLocationManager == null) {
@@ -152,21 +144,12 @@ class LocationUpdateService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 //        prepareForegroundNotification()
-
-        if (spf.getBoolean("status", false))
-            startLocationUpdates()
-        else {
-            mFusedLocationClient?.removeLocationUpdates(
-                locationCallback
-            )
-
-        }
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (wakelock != null) {
+        if ( wakelock != null) {
             wakelock?.release();
             wakelock = null
         }
@@ -197,6 +180,7 @@ class LocationUpdateService : Service() {
         )
 
 
+
     }
 
 
@@ -204,55 +188,14 @@ class LocationUpdateService : Service() {
     private val locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
-
-            if (spf.getBoolean("status", false)) {
-                val currentLocation: Location = locationResult.lastLocation
-
-                val data =  HashMap<String,Any>()
-                data.put("lat",currentLocation.latitude)
-                data.put("lng",currentLocation.longitude)
-                data.put("data",spf!!.getString(Constant._UDATA,"{}")!!)
+            val currentLocation: Location = locationResult.lastLocation
+            Log.e(
+                "Locations",
+                currentLocation.getLatitude().toString() + "," + currentLocation.getLongitude()
+            )
 
 
-               val metter = distanceBetween(currentLocation.latitude,currentLocation.longitude,spf.getFloat("lat",0.0.toFloat()).toDouble(),spf.getFloat("lng",0.0.toFloat()).toDouble())
-
-
-
-//                Log.e("ddddaaaa","${metter}")
-                val edit = spf.edit()
-                edit.putFloat("lat",currentLocation.latitude.toFloat())
-                edit.putFloat("lng",currentLocation.longitude.toFloat())
-                edit.commit()
-
-
-                myRefLocation.child(user.uid!!).setValue(data)
-
-
-            }else {
-                mFusedLocationClient?.removeLocationUpdates(
-                    this
-                )
-
-                myRefLocation.child(user.uid!!).removeValue()
-            }
-
-
-
-
-
-
-//
-//            Log.e(
-//                "Locations",
-//                currentLocation.getLatitude().toString() + "," + currentLocation.getLongitude()
-//            )
-//
-//
-//            Toast.makeText(baseContext,
-//                "${currentLocation.getLatitude()
-//                    .toString() + "," + currentLocation.getLongitude()}",
-//                Toast.LENGTH_SHORT
-//            ).show()
+            Toast.makeText(baseContext,"${currentLocation.getLatitude().toString() + "," + currentLocation.getLongitude()}",Toast.LENGTH_SHORT).show()
             //Share/Publish Location
         }
     }
@@ -262,9 +205,9 @@ class LocationUpdateService : Service() {
     )
 
 
-    class LocationListener(provider: String) :
+     class LocationListener(provider: String) :
         android.location.LocationListener {
-        val TAG = "test"
+        val TAG ="test"
 
         var mLastLocation: Location
         override fun onLocationChanged(location: Location) {
@@ -294,26 +237,5 @@ class LocationUpdateService : Service() {
         }
     }
 
-    private fun distanceBetween(
-        lat1: Double,
-        lon1: Double,
-        lat2: Double,
-        lon2: Double
-    ): Double {
-        val theta = lon1 - lon2
-        var dist = (Math.sin(deg2rad(lat1))
-                * Math.sin(deg2rad(lat2))
-                + (Math.cos(deg2rad(lat1))
-                * Math.cos(deg2rad(lat2))
-                * Math.cos(deg2rad(theta))))
-        dist = Math.acos(dist)
-        dist = dist * 180.0 / Math.PI
-        dist = dist * 60 * 1.1515 * 1000
-        return dist
-    }
-
-    private fun deg2rad(deg: Double): Double {
-        return deg * Math.PI / 180.0
-    }
 
 }

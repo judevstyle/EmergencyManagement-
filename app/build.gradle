@@ -73,6 +73,10 @@ dependencies {
     implementation 'com.karumi:dexter:6.2.2'
     implementation 'id.zelory:compressor:3.0.0'
     implementation project(':ucrop')
+    implementation 'com.github.smarteist:autoimageslider:1.4.0-appcompat'
+
+    implementation 'com.facebook.fresco:fresco:1.9.0'
+    implementation 'com.github.stfalcon:frescoimageviewer:0.5.0'
     implementation 'com.rishabhharit.roundedimageview:RoundedImageView:0.8.4'
     implementation 'com.github.angads25:toggle:1.1.0'
 

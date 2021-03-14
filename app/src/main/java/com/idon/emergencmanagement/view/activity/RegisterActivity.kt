@@ -355,9 +355,8 @@ class RegisterActivity : BaseActivity() {
 
     fun basisConfig(@NonNull uCrop: UCrop): UCrop {
         var data = uCrop
-        data = uCrop.withAspectRatio(512.toFloat(), 512.toFloat())
+        data = uCrop.withAspectRatio(192.toFloat(), 192.toFloat())
         return data
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

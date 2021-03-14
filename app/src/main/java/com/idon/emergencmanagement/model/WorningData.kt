@@ -1,9 +1,12 @@
 package com.idon.emergencmanagement.model
 
 import android.net.Uri
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
 class WorningData : ArrayList<WorningDataItem>()
 
+@Parcelize
 data class WorningDataItem(
     var date_create: String?,
     var img: ArrayList<ImageWorningImg>?,
@@ -12,9 +15,10 @@ data class WorningDataItem(
     var user: UserFull?,
     var w_desc: String?,
     var w_topic: String?,
-    var wi: String?
+    var wid: String?,
+    var status:Int? = 0
 
-)
+):Parcelable
 
 data class Img(
     var img: String?,
@@ -22,10 +26,9 @@ data class Img(
     var base64_img: String?,
     var uri_img: Uri?,
     var img_del: Int = 0
-
-
 )
 
+@Parcelize
 data class User(
     var username:String?,
     var password:String?,
@@ -35,4 +38,4 @@ data class User(
     var lname: String?,
     var uid: String?,
     var type: Int?
-)
+):Parcelable

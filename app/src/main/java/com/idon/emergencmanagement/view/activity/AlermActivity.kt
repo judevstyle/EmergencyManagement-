@@ -2,7 +2,11 @@ package com.idon.emergencmanagement.view.activity
 
 import android.content.Intent
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import com.idon.emergencmanagement.R
 import com.tt.workfinders.BaseClass.BaseActivity
 
@@ -12,6 +16,13 @@ class AlermActivity : BaseActivity(){
 
 
     override fun getContentView(): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            val w: Window = window
+            w.setFlags(
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            )
+        }
         return R.layout.activity_alerm
     }
 
@@ -22,13 +33,14 @@ class AlermActivity : BaseActivity(){
         playSound()
 
 
+
     }
 
     fun playSound() {
         val count = 100 * .01f
 
         if (mMediaPlayer == null) {
-            mMediaPlayer = MediaPlayer.create(this, R.raw.alerm)
+            mMediaPlayer = MediaPlayer.create(this, R.raw.alerm1)
             mMediaPlayer!!.isLooping = true
             mMediaPlayer!!.setVolume(count,count);
 
@@ -57,6 +69,16 @@ class AlermActivity : BaseActivity(){
             mMediaPlayer!!.release()
             mMediaPlayer = null
         }
+    }
+
+    fun actionPage(view: View) {
+
+        val intent = Intent(this, MainMapsActivity::class.java)
+        intent.flags =
+            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+
     }
 
 
