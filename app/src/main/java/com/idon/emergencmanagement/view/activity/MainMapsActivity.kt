@@ -58,13 +58,17 @@ import com.tt.workfinders.BaseClass.BaseActivity
 import com.zine.ketotime.network.HttpMainConnect
 import com.zine.ketotime.network.HttpMapsConnect
 import com.zine.ketotime.util.Constant
+import com.zine.ketotime.view.CustomTextView
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_main_maps.*
 import kotlinx.android.synthetic.main.fragment_main.actionHide
 import kotlinx.android.synthetic.main.fragment_main.actionShow
-import kotlinx.android.synthetic.main.fragment_main.imgIM
 import kotlinx.android.synthetic.main.fragment_main.pulsator
 import kotlinx.android.synthetic.main.toolbar_title.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -73,9 +77,10 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylineClickListener, GoogleMap.OnMarkerClickListener,
-    GoogleMap.OnPolygonClickListener,HandleClickListener {
-     var data: WorningDataItem? = null
+class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylineClickListener,
+    GoogleMap.OnMarkerClickListener,
+    GoogleMap.OnPolygonClickListener, HandleClickListener {
+    var data: WorningDataItem? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var adapter: SliderAdapter
 
@@ -112,7 +117,7 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
         myRef = database.getReference().child("worning")
 
-        myRef.addListenerForSingleValueEvent(object : ValueEventListener{
+        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
 
 
@@ -122,7 +127,7 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
                 val edit = spf.edit()
 
                 val size = snapshot.getChildrenCount()
-                edit.putInt("count",size.toInt()).commit()
+                edit.putInt("count", size.toInt()).commit()
 
             }
         })
@@ -134,20 +139,41 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
         val serviceTracking = Intent(this@MainMapsActivity, LocationUpdateService::class.java)
 
-        switchStatus.isClickable = spf.getBoolean("status",false)
+        Log.e("sss Status","${spf.getBoolean("status", false)}")
+        switchStatus.isOn = spf.getBoolean("status", false)
+        val edit = spf.edit()
+
+        when (spf.getBoolean("status", false)) {
+            true -> {
+//                edit.putBoolean("status", true).commit()
+                startService(serviceTracking)
+                showToast("ppppww")
+            }
+            else -> {
+//                edit.putBoolean("status", false)
+//                edit.putFloat("lat", 0.0.toFloat())
+//                edit.putFloat("lng", 0.0.toFloat())
+//                edit.commit()
+                stopService(serviceTracking)
+            }
+
+        }
+
         switchStatus.setOnToggledListener(object : OnToggledListener {
 
 
             override fun onSwitched(toggleableView: ToggleableView?, isOn: Boolean) {
-                val edit = spf.edit()
 
                 when (isOn) {
                     true -> {
-                        edit.putBoolean("status",true).commit()
+                        edit.putBoolean("status", true).commit()
                         startService(serviceTracking)
                     }
                     else -> {
-                        edit.putBoolean("status",false).commit()
+                        edit.putBoolean("status", false)
+                        edit.putFloat("lat", 0.0.toFloat())
+                        edit.putFloat("lng", 0.0.toFloat())
+                        edit.commit()
                         stopService(serviceTracking)
                     }
 
@@ -190,6 +216,7 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
 
     }
+
     val sliderItemListURL: ArrayList<String> = ArrayList()
     val sliderItemList: ArrayList<SliderItem> = ArrayList()
 
@@ -218,7 +245,6 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
             sliderItemListURL.add("${Constant.BASE_URL}${values.img}")
             sliderItem.setImageUrl("${Constant.BASE_URL}${values.img}")
             sliderItemList.add(sliderItem)
-
 
 
         }
@@ -255,7 +281,7 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
-                Log.e("ddd","dldpw locaa")
+                Log.e("ddd", "dldpw locaa")
 
                 HttpMainConnect()
                     .getApiService()
@@ -308,8 +334,7 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
     fun createCustomMarker(
         context: Context,
-        @DrawableRes resource: Int,
-        _name: String?
+        url: Bitmap, name: String
     ): Bitmap? {
         val marker =
             (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
@@ -317,171 +342,192 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
                 null
             )
 
-
-        val markerImv = marker.findViewById<CircleImageView>(R.id.imgIM)
-//        val nameTV = marker.findViewById<CustomTextView>(R.id.nameTV)
-
-//        markerImv.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
-
-        Log.e("ldld","pppppp")
-//        nameTV.text = "${user.display_name}"
-        Log.e("img","${Constant.BASE_URL}${user.avatar}")
-//        Glide.with(this).load("${Constant.BASE_URL}${user.avatar}").into(markerImv);
-        Glide.with(this).load("https://lh3.googleusercontent.com/ogw/ADGmqu94yitecg8ytqn_PvyyuJt0RwW_97zVtBuKaX1TRA=s192-c-mo").into(markerImv);
-//        val url = URL("https://lh3.googleusercontent.com/ogw/ADGmqu94yitecg8ytqn_PvyyuJt0RwW_97zVtBuKaX1TRA=s192-c-mo")
+        val markerImv = marker.findViewById<CircleImageView>(R.id.markerIM)
+        val nameTV = marker.findViewById<CustomTextView>(R.id.nameTV)
+//        try {
+//            val url = URL("${Constant.BASE_URL}${url}")
+//            val image =
+//                BitmapFactory.decodeStream(url.openStream())
+//            markerImv.setImageBitmap(image)
+//        } catch (e: IOException) {
+//            println(e)
+//        }
 
 
+//                markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
+            Log.e("ok", "kk")
+//        Log.e("dds","${Constant.BASE_URL}${url}")
+            nameTV.text = "${name}"
 
+        markerImv.setImageBitmap(url)
 
-//        val bitmap1: Bitmap =
-//            BitmapFactory.decodeStream(url.openConnection().getInputStream())
-//        markerImv.setImageBitmap(getBitmapFromURL("https://lh3.googleusercontent.com/ogw/ADGmqu94yitecg8ytqn_PvyyuJt0RwW_97zVtBuKaX1TRA=s192-c-mo"))
+//        Glide.with(this).load("https://www.flashexpress.co.th/img/logo.png")
+//            .listener(object : RequestListener<Drawable> {
+//                override fun onLoadFailed(
+//                    e: GlideException?,
+//                    model: Any?,
+//                    target: Target<Drawable>?,
+//                    isFirstResource: Boolean
+//                ): Boolean {
+//
+//                    Log.e("err","${e?.message}")
+//                    return  false
+//
+//                }
+//
+//                override fun onResourceReady(
+//                    resource: Drawable?,
+//                    model: Any?,
+//                    target: Target<Drawable>?,
+//                    dataSource: DataSource?,
+//                    isFirstResource: Boolean
+//                ): Boolean {
+//                    Log.e("ok","kl")
+//                    return  true
+//                }
+//
+//            })
+//            .into(markerImv);
 
-        //https://lh3.googleusercontent.com/ogw/ADGmqu94yitecg8ytqn_PvyyuJt0RwW_97zVtBuKaX1TRA=s192-c-mo
-        //        markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
-
-        //        Glide.with(this).load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s").into(markerImage);
-        val displayMetrics = DisplayMetrics()
-        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
-        marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
-        marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
-        marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-        marker.buildDrawingCache()
-        val bitmap = Bitmap.createBitmap(
-            marker.measuredWidth,
-            marker.measuredHeight,
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        marker.draw(canvas)
-        return bitmap
-    }
-
-
-    fun getBitmapFromURL(src: String): Bitmap? {
-        return try {
-            Log.e("src", src!!)
-            val url = URL(src)
-            val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
-            connection.setDoInput(true)
-            connection.connect()
-            val input: InputStream = connection.getInputStream()
-            val myBitmap =
-                BitmapFactory.decodeStream(input)
-            Log.e("Bitmap", "returned")
-            myBitmap
-        } catch (e: IOException) {
-            e.printStackTrace()
-//            Log.e("Exception", e.message?)
-            null
+            val displayMetrics = DisplayMetrics()
+            (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+            marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
+            marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+            marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+            marker.buildDrawingCache()
+            val bitmap = Bitmap.createBitmap(
+                marker.measuredWidth,
+                marker.measuredHeight,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            marker.draw(canvas)
+            return bitmap
         }
-    }
 
-    fun createCustomMarkerShop(
-        context: Context,
-        @DrawableRes resource: Int,
-        _name: String?
-    ): Bitmap? {
-        val marker =
-            (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
-                R.layout.custom_marker_layout_shop,
+
+        fun getBitmapFromURL(src: String): Bitmap? {
+            return try {
+                Log.e("src", src!!)
+                val url = URL(src)
+                val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+                connection.setDoInput(true)
+                connection.connect()
+                val input: InputStream = connection.getInputStream()
+                val myBitmap =
+                    BitmapFactory.decodeStream(input)
+                Log.e("Bitmap", "returned")
+                myBitmap
+            } catch (e: IOException) {
+                e.printStackTrace()
+//            Log.e("Exception", e.message?)
                 null
+            }
+        }
+
+        fun createCustomMarkerShop(
+            context: Context,
+            @DrawableRes resource: Int,
+            _name: String?
+        ): Bitmap? {
+            val marker =
+                (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+                    R.layout.custom_marker_layout_shop,
+                    null
+                )
+
+
+            val displayMetrics = DisplayMetrics()
+            (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+            marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
+            marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+            marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+            marker.buildDrawingCache()
+            val bitmap = Bitmap.createBitmap(
+                marker.measuredWidth,
+                marker.measuredHeight,
+                Bitmap.Config.ARGB_8888
             )
+            val canvas = Canvas(bitmap)
+            marker.draw(canvas)
+            return bitmap
+        }
 
 
+        fun createCustomMarkerFire(
+            context: Context,
+            @DrawableRes resource: Int,
+            _name: String?
+        ): Bitmap? {
+            val marker =
+                (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+                    R.layout.custom_marker_fire_layout,
+                    null
+                )
+            //        markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
 
-
-         val displayMetrics = DisplayMetrics()
-        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
-        marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
-        marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
-        marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-        marker.buildDrawingCache()
-        val bitmap = Bitmap.createBitmap(
-            marker.measuredWidth,
-            marker.measuredHeight,
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        marker.draw(canvas)
-        return bitmap
-    }
-
-
-    fun createCustomMarkerFire(
-        context: Context,
-        @DrawableRes resource: Int,
-        _name: String?
-    ): Bitmap? {
-        val marker =
-            (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
-                R.layout.custom_marker_fire_layout,
-                null
+            //        Glide.with(this).load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s").into(markerImage);
+            val displayMetrics = DisplayMetrics()
+            (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+            marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
+            marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+            marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+            marker.buildDrawingCache()
+            val bitmap = Bitmap.createBitmap(
+                marker.measuredWidth,
+                marker.measuredHeight,
+                Bitmap.Config.ARGB_8888
             )
-        //        markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
-
-        //        Glide.with(this).load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s").into(markerImage);
-        val displayMetrics = DisplayMetrics()
-        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
-        marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
-        marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
-        marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-        marker.buildDrawingCache()
-        val bitmap = Bitmap.createBitmap(
-            marker.measuredWidth,
-            marker.measuredHeight,
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        marker.draw(canvas)
-        return bitmap
-    }
+            val canvas = Canvas(bitmap)
+            marker.draw(canvas)
+            return bitmap
+        }
 
 //100.539393
 
-    fun setMarkersAndRoute(route: Route) {
+        fun setMarkersAndRoute(route: Route) {
 
-        val startLatLng = LatLng(route.startLat!!, route.startLng!!)
-        val startMarkerOptions: MarkerOptions =
-            MarkerOptions().position(LatLng(13.981472713187685, 100.53894242836355))
-                .title(route.startName).icon(
-                    BitmapDescriptorFactory.fromBitmap(
-                        createCustomMarker(this, R.drawable.bg_gradient, "Narender")
+            val startLatLng = LatLng(route.startLat!!, route.startLng!!)
+//        val startMarkerOptions: MarkerOptions =
+//            MarkerOptions().position(LatLng(13.981472713187685, 100.53894242836355))
+//                .title(route.startName).icon(
+//                    BitmapDescriptorFactory.fromBitmap(
+//                        createCustomMarker(this, "", "Narender")
+//                    )
+//                )
+            val endLatLng = LatLng(route.endLat!!, route.endLng!!)
+            val endMarkerOptions: MarkerOptions =
+                MarkerOptions().position(LatLng(13.981872776682234, 100.54104165309973))
+                    .title(route.endName).icon(
+                        BitmapDescriptorFactory.fromBitmap(
+                            createCustomMarkerShop(this, R.drawable.bg_gradient, "Narender")
+                        )
                     )
-                )
-        val endLatLng = LatLng(route.endLat!!, route.endLng!!)
-        val endMarkerOptions: MarkerOptions =
-            MarkerOptions().position(LatLng(13.981872776682234, 100.54104165309973))
-                .title(route.endName).icon(
-                    BitmapDescriptorFactory.fromBitmap(
-                        createCustomMarkerShop(this, R.drawable.bg_gradient, "Narender")
-                    )
-                )
 
 
-        val fireMarkerOptions: MarkerOptions =
-            MarkerOptions().position(LatLng(13.982201553484167, 100.539768506215))
-                .title(route.endName).icon(
-                    BitmapDescriptorFactory.fromBitmap(
-                        createCustomMarkerFire(this, R.drawable.bg_gradient, "Narender")
+            val fireMarkerOptions: MarkerOptions =
+                MarkerOptions().position(LatLng(13.982201553484167, 100.539768506215))
+                    .title(route.endName).icon(
+                        BitmapDescriptorFactory.fromBitmap(
+                            createCustomMarkerFire(this, R.drawable.bg_gradient, "Narender")
+                        )
                     )
-                )
 
-        val fire2MarkerOptions: MarkerOptions =
-            MarkerOptions().position(LatLng(13.981857160235363, 100.53938404802422))
-                .title(route.endName).icon(
-                    BitmapDescriptorFactory.fromBitmap(
-                        createCustomMarkerFire(this, R.drawable.bg_gradient, "Narender")
+            val fire2MarkerOptions: MarkerOptions =
+                MarkerOptions().position(LatLng(13.981857160235363, 100.53938404802422))
+                    .title(route.endName).icon(
+                        BitmapDescriptorFactory.fromBitmap(
+                            createCustomMarkerFire(this, R.drawable.bg_gradient, "Narender")
+                        )
                     )
-                )
 
 
 //        val startMarker = mGoogleMap!!.addMarker(startMarkerOptions)
 //        val endMarker = mGoogleMap!!.addMarker(endMarkerOptions)
 
 
-        mGoogleMap!!.addMarker(fireMarkerOptions)
-        mGoogleMap!!.addMarker(fire2MarkerOptions)
+            mGoogleMap!!.addMarker(fireMarkerOptions)
+            mGoogleMap!!.addMarker(fire2MarkerOptions)
 //
 //        mRouteMarkerList.add(startMarker)
 //        mRouteMarkerList.add(endMarker)
@@ -501,239 +547,310 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 //        mRoutePolyline = mGoogleMap!!.addPolyline(polylineOptions)
 //        mGoogleMap!!.animateCamera(MapsFactory.autoZoomLevel(mRouteMarkerList))
 
-    }
-
-    fun drawRoute(context: Context): PolylineOptions {
-        val polylineOptions = PolylineOptions()
-        polylineOptions.width(DisplayUtility.px2dip(context, 72.toFloat()).toFloat())
-        polylineOptions.geodesic(true)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            polylineOptions.color(context.resources.getColor(R.color.black, context.theme))
-        } else {
-            polylineOptions.color(context.resources.getColor(R.color.black))
         }
-        return polylineOptions
-    }
 
-    override fun onPolylineClick(p0: Polyline?) {
-    }
+        fun drawRoute(context: Context): PolylineOptions {
+            val polylineOptions = PolylineOptions()
+            polylineOptions.width(DisplayUtility.px2dip(context, 72.toFloat()).toFloat())
+            polylineOptions.geodesic(true)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                polylineOptions.color(context.resources.getColor(R.color.black, context.theme))
+            } else {
+                polylineOptions.color(context.resources.getColor(R.color.black))
+            }
+            return polylineOptions
+        }
 
-    override fun onPolygonClick(p0: Polygon?) {
-    }
+        override fun onPolylineClick(p0: Polyline?) {
+        }
 
-    private var currentLocationMarker: Marker? = null
+        override fun onPolygonClick(p0: Polygon?) {
+        }
+
+        private var currentLocationMarker: Marker? = null
 
 
-    @SuppressLint("MissingPermission")
-    private fun getLastLocation() {
-        mFusedLocationClient!!.lastLocation
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful && task.result != null) {
+        @SuppressLint("MissingPermission")
+        private fun getLastLocation() {
+            mFusedLocationClient!!.lastLocation
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful && task.result != null) {
 
-                    currentLocationMarker?.remove()
 
-                    location = LatLng(task.result.latitude, task.result.longitude)
-                    val mrkerOptions: MarkerOptions =
-                        MarkerOptions().position(location!!).title("").icon(
-                            BitmapDescriptorFactory.fromBitmap(
-                                createCustomMarker(this, R.drawable.bg_gradient, "Narender")
-                            )
-                        )
-                    currentLocationMarker = mGoogleMap?.addMarker(mrkerOptions)
+                        Log.e("dldl", "dl;;;;")
+                        //  currentLocationMarker?.remove()
 
+                        showToast("ldl")
+
+                        currentLocationMarker?.let {
+
+
+//                        position.latitude = 0.0
+
+                        } ?: kotlin.run {
+                            location = LatLng(task.result.latitude, task.result.longitude)
+
+                            GlobalScope.launch(Dispatchers.Main) {
+
+
+//            var im:Bitmap? = null
+                                withContext(Dispatchers.IO) {
+                                    try {
+                                        val url = URL("${Constant.BASE_URL}${user.avatar}")
+                                        val connection =
+                                            url.openConnection() as HttpURLConnection
+                                        connection.doInput = true
+                                        connection.connect()
+                                        val input = connection.inputStream
+                                        val im = BitmapFactory.decodeStream(input)
+
+
+                                        withContext(Dispatchers.Main){
+//                                            markerImv.setImageBitmap(im)
+                                            showToast("ooooss")
+                                            avatarImg.setImageBitmap(im)
+                                            val mrkerOptions: MarkerOptions =
+                                                MarkerOptions().position(location!!).title("").icon(
+                                                    BitmapDescriptorFactory.fromBitmap(
+                                                        createCustomMarker(
+                                                            this@MainMapsActivity,
+                                                            im,
+                                                            "${user.display_name}"
+                                                        )
+                                                    )
+                                                )
+                                            currentLocationMarker = mGoogleMap?.addMarker(mrkerOptions)
+
+                                        }
+                                    } catch (e: IOException) {
+                                        e.printStackTrace()
+                                        null
+                                    }
+                                }
+
+
+
+                            }
+
+
+
+
+//                        Handler().postDelayed({
+//                            //doSomethingHere()
+//                            currentLocationMarker?.position = LatLng(0.0,0.0)
+//
+//                        }, 5000)
+//                        Timer("SettingUp", false).schedule(5000) {
+//
+//
+//
+//                        }
+
+
+                        }
+
+//                    currentLocationMarker.g
+
+                    } else {
+                        showToast("Err")
+                    }
+                }
+        }
+
+        fun setMarker(locate: LatLng) {
+
+        }
+
+
+        inner class CallComp : Callback<CompanyData> {
+
+            init {
+                showProgressDialog()
+            }
+
+            override fun onFailure(call: Call<CompanyData>, t: Throwable) {
+                showToast("err")
+                hideDialog()
+            }
+
+            override fun onResponse(call: Call<CompanyData>, response: Response<CompanyData>) {
+                hideDialog()
+
+                if (response.isSuccessful) {
+
+                    response.body()?.let {
+
+                        companyData = it
+                        setSaveMarker(it)
+
+                    }
 
                 } else {
-                    showToast("Err")
-                }
-            }
-    }
-
-    fun setMarker(locate: LatLng) {
-
-    }
-
-
-
-
-
-    inner class CallComp : Callback<CompanyData> {
-
-        init {
-            showProgressDialog()
-        }
-
-        override fun onFailure(call: Call<CompanyData>, t: Throwable) {
-            showToast("err")
-            hideDialog()
-        }
-
-        override fun onResponse(call: Call<CompanyData>, response: Response<CompanyData>) {
-            hideDialog()
-
-            if (response.isSuccessful) {
-
-                response.body()?.let {
-
-                    companyData = it
-                    setSaveMarker(it)
+                    showToast("err")
 
                 }
-
-            } else {
-                showToast("err")
-
             }
         }
-    }
 
 
+        inner class CallWorning : Callback<WorningData> {
 
-    inner class CallWorning : Callback<WorningData> {
-
-        init {
+            init {
 //            showProgressDialog()
-        }
+            }
 
-        override fun onFailure(call: Call<WorningData>, t: Throwable) {
-            showToast("err")
-            hideDialog()
-        }
+            override fun onFailure(call: Call<WorningData>, t: Throwable) {
+                showToast("err")
+                hideDialog()
+            }
 
-        override fun onResponse(call: Call<WorningData>, response: Response<WorningData>) {
-            hideDialog()
+            override fun onResponse(call: Call<WorningData>, response: Response<WorningData>) {
+                hideDialog()
 
-            if (response.isSuccessful) {
+                if (response.isSuccessful) {
 
-                response.body()?.let {
-
-
-                    for (mark in listMark){
-                        mark.remove()
-                    }
-                    listMark.clear()
+                    response.body()?.let {
 
 
-                    for (data in it){
+                        for (mark in listMark) {
+                            mark.remove()
+                        }
+                        listMark.clear()
 
-                        val markerOptions: MarkerOptions = MarkerOptions().position(
-                            LatLng(
-                                data.lat!!,
-                                data.lng!!
+
+                        for (data in it) {
+
+                            val markerOptions: MarkerOptions = MarkerOptions().position(
+                                LatLng(
+                                    data.lat!!,
+                                    data.lng!!
+                                )
+                            ).title("").icon(
+                                BitmapDescriptorFactory.fromBitmap(
+                                    createCustomMarkerFire(
+                                        this@MainMapsActivity,
+                                        R.drawable.bg_gradient,
+                                        "Narender"
+                                    )
+                                )
                             )
-                        ).title("").icon(
-                            BitmapDescriptorFactory.fromBitmap(
-                                createCustomMarkerFire(this@MainMapsActivity, R.drawable.bg_gradient, "Narender")
-                            )
-                        )
-                       val da = mGoogleMap?.addMarker(markerOptions)
-                        da!!.tag = data
-                        listMark.add(da)
-                    }
+                            val da = mGoogleMap?.addMarker(markerOptions)
+                            da!!.tag = data
+                            listMark.add(da)
+                        }
 //                    Log.e("ddd","${it.size}")
 
 
+                    }
+
+                } else {
+                    showToast("err")
+
                 }
-
-            } else {
-                showToast("err")
-
             }
+
         }
 
-    }
+
+        val listMark = ArrayList<Marker>()
+
+        private var compLocationMarker: Marker? = null
 
 
+        fun setSaveMarker(companyData: CompanyData) {
 
-    val listMark = ArrayList<Marker>()
-
-    private var compLocationMarker: Marker? = null
-
-
-    fun setSaveMarker(companyData: CompanyData) {
-
-        compLocationMarker?.remove()
-        val markerOptions: MarkerOptions = MarkerOptions().position(
-            LatLng(
-                companyData.location_evacuate_lat!!,
-                companyData.location_evacuate_lng!!
+            compLocationMarker?.remove()
+            val markerOptions: MarkerOptions = MarkerOptions().position(
+                LatLng(
+                    companyData.location_evacuate_lat!!,
+                    companyData.location_evacuate_lng!!
+                )
+            ).title("").icon(
+                BitmapDescriptorFactory.fromBitmap(
+                    createCustomMarkerShop(this, R.drawable.bg_gradient, "Narender")
+                )
             )
-        ).title("").icon(
-            BitmapDescriptorFactory.fromBitmap(
-                createCustomMarkerShop(this, R.drawable.bg_gradient, "Narender")
-            )
-        )
-        mGoogleMap!!.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(companyData.location_company_lat!!,companyData.location_company_lng!!), 18.0f));
+            mGoogleMap!!.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(
+                        companyData.location_company_lat!!,
+                        companyData.location_company_lng!!
+                    ), 18.0f
+                )
+            );
 
-        compLocationMarker = mGoogleMap?.addMarker(markerOptions)
+            compLocationMarker = mGoogleMap?.addMarker(markerOptions)
 
-    }
-    private fun updateLocation() {
-
-        builLocationRequest()
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, getPendingIntent())
-
-    }
-
-    private fun getPendingIntent(): PendingIntent? {
-        val intents = Intent(this, MyLocationService::class.java)
-        intents.setAction(MyLocationService.ACTION_PROCESS_UPDATE)
-        return PendingIntent.getBroadcast(this, 0, intents, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
-
-    lateinit var locationRequest: LocationRequest
-
-    private fun builLocationRequest() {
-        locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 100
         }
 
-    }
+        private fun updateLocation() {
 
-    override fun onMarkerClick(marker: Marker?): Boolean {
+            builLocationRequest()
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, getPendingIntent())
 
-        try {
-            data = marker?.tag as WorningDataItem
-            nameTV.text = "${data?.user!!.display_name}"
-            topicTV.text = "${data?.w_topic}"
-            descTV.text = "${data?.w_desc}"
-            Glide.with(this).load("${Constant.BASE_URL}${data?.user!!.avatar}").into(avatarImg)
-            boxWorn.visibility = View.VISIBLE
+        }
+
+        private fun getPendingIntent(): PendingIntent? {
+            val intents = Intent(this, MyLocationService::class.java)
+            intents.setAction(MyLocationService.ACTION_PROCESS_UPDATE)
+            return PendingIntent.getBroadcast(this, 0, intents, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        lateinit var locationRequest: LocationRequest
+
+        private fun builLocationRequest() {
+            locationRequest = LocationRequest.create().apply {
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                interval = 100
+            }
+
+        }
+
+        override fun onMarkerClick(marker: Marker?): Boolean {
+
+            try {
+                data = marker?.tag as WorningDataItem
+                nameTV.text = "${data?.user!!.display_name}"
+                topicTV.text = "${data?.w_topic}"
+                descTV.text = "${data?.w_desc}"
+                Glide.with(this).load("${Constant.BASE_URL}${data?.user!!.avatar}").into(avatarImg)
+                boxWorn.visibility = View.VISIBLE
 //            imageSlider.visibility = View.GONE
-            actionHide(actionHide)
+                actionHide(actionHide)
 
-        }catch (ex:TypeCastException){}
+            } catch (ex: TypeCastException) {
+            }
 
-        return true
+            return true
+
+        }
+
+        override fun onItemClick(view: View, position: Int, action: Int) {
+
+
+            ImageViewer.Builder(this, sliderItemListURL)
+                .setStartPosition(position)
+                .show()
+
+        }
+
 
     }
-
-    override fun onItemClick(view: View, position: Int, action: Int) {
-
-
-        ImageViewer.Builder(this, sliderItemListURL)
-            .setStartPosition(position)
-            .show()
-
-    }
-
-
-}

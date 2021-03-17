@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/dimen12"
+    android:layout_marginLeft="@dimen/dimen12"
+    android:layout_marginRight="@dimen/dimen12"
+    >
+
+    <LinearLayout
+        android:padding="@dimen/dimen8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/dimen12"
+        android:orientation="horizontal">
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/avatarImg"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginLeft="@dimen/dimen12"
+                android:src="@drawable/ic_fire" />
+
+
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_gravity="center"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dimen12"
+            android:orientation="vertical">
+
+            <com.zine.ketotime.view.CustomTextView
+                android:id="@+id/nameTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="17sp" />
+
+            <com.zine.ketotime.view.CustomTextView
+                android:id="@+id/typeTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp" />
+
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/actionCall"
+            android:layout_gravity="bottom"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_telephone"/>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

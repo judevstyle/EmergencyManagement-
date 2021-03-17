@@ -34,7 +34,7 @@
 
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/imgIM"
+                android:id="@+id/markerIM"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:layout_marginRight="@dimen/dimen8"
@@ -42,6 +42,7 @@
                 android:layout_marginTop="6dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginLeft="9dp"
+                android:src="@drawable/ic_me"
                 android:contentDescription="@null"
                 app:civ_border_color="#fff" />
         </RelativeLayout>

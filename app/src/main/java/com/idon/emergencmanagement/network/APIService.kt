@@ -30,14 +30,39 @@ interface APIService {
     ): Call<WorningData>
 
 
+
+    @GET("load_warning_checkin.php")
+    fun getCheckIn(
+    ): Call<ArrayList<UserFull>>
+
+    @GET("load_checkin_nottrack.php")
+    fun getCheckInNoneTrack(
+    ): Call<ArrayList<UserFull>>
+
+
+
     @GET("load_accept_woring.php")
     fun getAccept(
     ): Call<WorningData>
+
+
+    @GET("load_contact.php")
+    fun getContact(
+    ): Call<ArrayList<ContactData>>
+
 
     @GET("load_comp.php")
     fun company(
         @Query("comp_id") compId:String
     ): Call<CompanyData>
+
+
+    @GET("load_my_notifydata.php")
+    fun getNotifyData(
+        @Query("uid") uid:String
+    ): Call<ArrayList<WorningDataItem>>
+
+
 
 
     @POST("register.php")

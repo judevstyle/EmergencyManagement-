@@ -28,6 +28,8 @@ class MenuApproveActivity : BaseActivity(){
 
     fun actionContact(view: View) {
 
+        startActivity(Intent(this,ContactActivity::class.java))
+
     }
 
 

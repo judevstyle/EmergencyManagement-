@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -166,6 +167,8 @@ class LocationUpdateService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Toast.makeText(context,"disldwo",Toast.LENGTH_SHORT).show()
+        Log.e("dlp","distroy")
         if (wakelock != null) {
             wakelock?.release();
             wakelock = null
@@ -208,24 +211,27 @@ class LocationUpdateService : Service() {
             if (spf.getBoolean("status", false)) {
                 val currentLocation: Location = locationResult.lastLocation
 
-                val data =  HashMap<String,Any>()
-                data.put("lat",currentLocation.latitude)
-                data.put("lng",currentLocation.longitude)
-                data.put("data",spf!!.getString(Constant._UDATA,"{}")!!)
 
 
                val metter = distanceBetween(currentLocation.latitude,currentLocation.longitude,spf.getFloat("lat",0.0.toFloat()).toDouble(),spf.getFloat("lng",0.0.toFloat()).toDouble())
 
 
+                if (metter > 5){
 
-//                Log.e("ddddaaaa","${metter}")
-                val edit = spf.edit()
-                edit.putFloat("lat",currentLocation.latitude.toFloat())
-                edit.putFloat("lng",currentLocation.longitude.toFloat())
-                edit.commit()
+                    val edit = spf.edit()
+                    edit.putFloat("lat",currentLocation.latitude.toFloat())
+                    edit.putFloat("lng",currentLocation.longitude.toFloat())
+                    edit.commit()
+
+                    val data =  HashMap<String,Any>()
+                    data.put("lat",currentLocation.latitude)
+                    data.put("lng",currentLocation.longitude)
+                    data.put("data",spf!!.getString(Constant._UDATA,"{}")!!)
+                    myRefLocation.child(user.uid!!).setValue(data)
+
+                }
 
 
-                myRefLocation.child(user.uid!!).setValue(data)
 
 
             }else {
@@ -315,5 +321,7 @@ class LocationUpdateService : Service() {
     private fun deg2rad(deg: Double): Double {
         return deg * Math.PI / 180.0
     }
+
+
 
 }
