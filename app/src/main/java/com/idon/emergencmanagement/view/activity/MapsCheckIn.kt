@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.os.Bundle
-import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,29 +14,23 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.DrawableRes
-import com.bumptech.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.idon.emergencmanagement.R
-import com.idon.emergencmanagement.model.CompanyData
 import com.idon.emergencmanagement.model.MerkerStaff
-import com.idon.emergencmanagement.model.User
 import com.idon.emergencmanagement.model.UserFull
+import com.idon.emergencmanagement.view.customview.BottomSheetDescDialog
 import com.tt.workfinders.BaseClass.BaseActivity
-import com.zine.ketotime.network.HttpMainConnect
 import com.zine.ketotime.util.Constant
 import com.zine.ketotime.view.CustomTextView
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlinx.android.synthetic.main.activity_main_maps.*
 import kotlinx.android.synthetic.main.toolbar_title.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -48,8 +41,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 
-class MapsCheckIn : BaseActivity(), OnMapReadyCallback {
+class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
+    private var savePosition: Marker? = null
     private lateinit var myRef: DatabaseReference
     private lateinit var database: FirebaseDatabase
     lateinit var mGoogleMap: GoogleMap
@@ -80,10 +74,24 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googlemap: GoogleMap?) {
         mGoogleMap = googlemap!!
-
-
+        mGoogleMap!!.setOnMarkerClickListener(this);
+        val latLng = LatLng(13.71946401985561, 100.63507735927159)
+        drawMarkerWithCircle(latLng)
         showToast("dkowl")
+        val fire2MarkerOptions: MarkerOptions =
+            MarkerOptions().position(latLng)
+                .title("").icon(
+                    BitmapDescriptorFactory.fromBitmap(
+                        createCustomMarkerShop(this)
+                    )
+                )
 
+
+//        val startMarker = mGoogleMap!!.addMarker(startMarkerOptions)
+//        val endMarker = mGoogleMap!!.addMarker(endMarkerOptions)
+
+
+      savePosition =  mGoogleMap!!.addMarker(fire2MarkerOptions)
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
 
@@ -112,7 +120,7 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback {
 
 
                 Log.e("dlw", "dlw")
-                mGoogleMap.clear()
+//                mGoogleMap.clear()
 
                 for (ds in snapshot.getChildren()) {
                     val dataUser = ds.child("data").value.toString()
@@ -124,7 +132,33 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback {
 
                     setSaveMarker(user, LatLng(lat, lng))
 
-                    Log.e("dld", "${lat}")
+//                    Log.e("dld", "${lat}")
+                }
+
+            }
+        })
+
+       val comp = database.getReference().child("comp")
+        comp.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+
+
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+
+//                mGoogleMap.clear()
+
+                for (ds in snapshot.getChildren()) {
+                    val radiusInMeters = ds.child("radiusInMeters:").value.toString().toInt()
+                    val lat = ds.child("lat").getValue().toString().toDouble()
+                    val lng = ds.child("lng").getValue().toString().toDouble()
+                    val gson = Gson()
+
+
+
+//                    Log.e("dld", "${lat}")
                 }
 
             }
@@ -138,35 +172,38 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback {
 
         val userData = hashMap.get(userFull.uid)
 
-        Log.e("lat", "${locate.latitude} , ${locate.longitude}")
-        Log.e("old", "${userData?.lat} , ${userData?.lng}")
+//        Log.e("lat", "${locate.latitude} , ${locate.longitude}")
+//        Log.e("old", "${userData?.lat} , ${userData?.lng}")
 
         if (hashMap.contains(userFull.uid)) {
             Log.e("lat", "${locate.latitude} , ${locate.longitude}")
             if (locate.latitude != userData?.lat && locate.longitude != userData?.lng) {
+                Log.e("lat11", "${locate.latitude} , ${locate.longitude}")
 
 //                val m =userData?.maerker
 
-//                val tmp = hashMap.get(userFull.uid!!)?.maerker
+                val tmp = hashMap.get(userFull.uid!!)?.maerker
+                tmp!!.position = locate
 
-//                tmp!!.position = LatLng(0.0, 0.0)
+                userData?.maerker = tmp
+//                userData?.maerker?.remove()
 
 
-                userData?.maerker?.remove()
+//                var opt = userData!!.maerkerOptions
+//                opt.position(locate)
+//               val m2 = mGoogleMap?.addMarker(userData?.maerkerOptions)
+//                m2.tag = userFull
+//
+//                userData
+//                userData?.maerker = m2
 
-
-                var opt = userData!!.maerkerOptions
-                opt.position(locate)
-               val m2 = mGoogleMap?.addMarker(userData?.maerkerOptions)
-                userData
-                userData?.maerker = m2
                 hashMap.set(userFull.uid!!,userData!!)
                 mGoogleMap!!.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         locate,
                         18.0f
                     )
-                );
+                )
 
 
 
@@ -220,6 +257,7 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback {
 
 
                             val m = mGoogleMap.addMarker(mrkerOptions)
+                            m.tag = userFull
                             val da = MerkerStaff(
                                 m.position.latitude,m.position.longitude,m, mrkerOptions
 
@@ -323,5 +361,51 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback {
         )
     }
 
+    override fun onMarkerClick(p0: Marker?): Boolean {
+        val data:UserFull = p0?.tag as UserFull
+        val bottomSheetPrixaDialog = BottomSheetDescDialog(data)
+        bottomSheetPrixaDialog.show(supportFragmentManager, "PrixaBottomSheet")
+
+        return true
+    }
+
+
+    private fun drawMarkerWithCircle(position: LatLng) {
+        val radiusInMeters = 50.0
+        val strokeColor = -0x10000 //red outline
+        val shadeColor = 0x44ff0000 //opaque red fill
+        val circleOptions: CircleOptions =
+            CircleOptions().center(position).radius(radiusInMeters).fillColor(resources.getColor(R.color.colorGreeTran))
+                .strokeColor(resources.getColor(R.color.colorGreen)).strokeWidth(8.toFloat())
+        mGoogleMap.addCircle(circleOptions)
+//        val markerOptions = MarkerOptions().position(position)
+//        mMarker = mGoogleMap.addMarker(markerOptions)
+    }
+
+    fun createCustomMarkerShop(
+        context: Context
+    ): Bitmap? {
+        val marker =
+            (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+                R.layout.custom_marker_layout_shop,
+                null
+            )
+
+
+        val displayMetrics = DisplayMetrics()
+        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+        marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
+        marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+        marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+        marker.buildDrawingCache()
+        val bitmap = Bitmap.createBitmap(
+            marker.measuredWidth,
+            marker.measuredHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        marker.draw(canvas)
+        return bitmap
+    }
 
 }

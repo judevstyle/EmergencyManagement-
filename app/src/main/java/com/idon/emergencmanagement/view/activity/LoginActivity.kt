@@ -136,6 +136,7 @@ class LoginActivity : BaseActivity(){
 
         override fun onFailure(call: Call<ResponeUserDao>, t: Throwable) {
             hideDialog()
+            Log.e("sss","${t.message}")
             showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ภายหลัง")
 
         }

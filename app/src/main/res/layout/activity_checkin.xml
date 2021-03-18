@@ -39,14 +39,6 @@
                 android:onClick="actionCheckIn"
                 android:layout_weight="1"/>
 
-            <com.zine.ketotime.view.CustomButton
-                android:layout_marginRight="@dimen/dimen12"
-                android:layout_width="0dp"
-                android:text="กำลังอพยบ"
-                android:textColor="@color/white"
-                android:background="@drawable/bg_input_button_primary"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
 
             <com.zine.ketotime.view.CustomButton
                 android:onClick="actionCheckNone"

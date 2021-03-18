@@ -13,7 +13,9 @@
 
     <color name="gray700">#999999</color>
     <color name="colorPrimarySoft">#6A6200EE</color>
-    <color name="colorPrimaryTran">#8B28a745</color>
+    <color name="colorGreeTran">#4F28A745</color>
+    <color name="colorGreen">#28a745</color>
+
     <color name="gray">#E2E2E2</color>
     <color name="grayB">#C9C9C9</color>
 

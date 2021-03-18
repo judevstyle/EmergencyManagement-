@@ -14,8 +14,11 @@ import com.idon.emergencmanagement.R
 import com.idon.emergencmanagement.model.ContactData
 import com.panuphong.smssender.helper.HandleClickListener
 import com.zine.ketotime.util.Constant
+import kotlinx.android.synthetic.main.item_contact.view.*
 import kotlinx.android.synthetic.main.item_img.view.*
 import kotlinx.android.synthetic.main.item_user_tracking.view.*
+import kotlinx.android.synthetic.main.item_user_tracking.view.avatarImg
+import kotlinx.android.synthetic.main.item_user_tracking.view.typeTV
 import kotlinx.android.synthetic.main.item_worning.view.*
 import kotlinx.android.synthetic.main.item_worning.view.nameTV
 import java.text.SimpleDateFormat
@@ -117,8 +120,14 @@ class ContactAdapter(
                 nameTV.text = " ${data!!.contact_name}"
                 typeTV.text = "จุดรับผิดชอบ : ${data!!.contact_position}"
                 Glide.with(this).load("${Constant.BASE_URL}${data.avatar}").into(avatarImg)
-                listener.onItemClick(this,adapterPosition,3)
-                
+
+                actionCall.setOnClickListener {
+                    listener.onItemClick(this,adapterPosition,3)
+
+
+                }
+
+
 
             }
         }

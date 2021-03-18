@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/avatarImg"
+            android:layout_gravity="center"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginLeft="@dimen/dimen12"
+            android:src="@drawable/ic_fire" />
+
+
+        <LinearLayout
+            android:layout_marginLeft="@dimen/dimen12"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:text="บ้านหางนา "
+                android:textSize="@dimen/txt18"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/nameTV" />
+            <TextView
+                android:text="บ้านหางนา"
+                android:textSize="@dimen/txt14"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/telTV" />
+            <TextView
+                android:background="@drawable/bg_type"
+                android:text="บ้านหางนา"
+                android:paddingRight="@dimen/dimen12"
+                android:paddingLeft="@dimen/dimen12"
+                android:textSize="@dimen/txt12"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/typeTV" />
+
+
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

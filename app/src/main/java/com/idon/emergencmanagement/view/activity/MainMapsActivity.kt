@@ -35,6 +35,7 @@ import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
+import com.google.maps.android.PolyUtil
 import com.idon.emergencmanagement.R
 import com.idon.emergencmanagement.helper.DisplayUtility
 import com.idon.emergencmanagement.model.*
@@ -53,6 +54,7 @@ import com.shin.tmsuser.model.maps.Directions
 import com.shin.tmsuser.model.maps.Route
 import com.smarteist.autoimageslider.SliderAnimations
 import com.smarteist.autoimageslider.SliderView
+import com.ssoft.candeliveryrider.helper.MapsFactory
 import com.stfalcon.frescoimageviewer.ImageViewer
 import com.tt.workfinders.BaseClass.BaseActivity
 import com.zine.ketotime.network.HttpMainConnect
@@ -80,13 +82,14 @@ import java.net.URL
 class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylineClickListener,
     GoogleMap.OnMarkerClickListener,
     GoogleMap.OnPolygonClickListener, HandleClickListener {
+    private var cicleMarker: Circle? = null
     var data: WorningDataItem? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var adapter: SliderAdapter
 
     lateinit var spf: SharedPreferences
     private var mRouteMarkerList = ArrayList<Marker>()
-    private lateinit var mRoutePolyline: Polyline
+    private  var mRoutePolyline: Polyline? = null
     private var mGoogleMap: GoogleMap? = null
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     var location: LatLng? = null
@@ -139,7 +142,7 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
         val serviceTracking = Intent(this@MainMapsActivity, LocationUpdateService::class.java)
 
-        Log.e("sss Status","${spf.getBoolean("status", false)}")
+        Log.e("sss Status", "${spf.getBoolean("status", false)}")
         switchStatus.isOn = spf.getBoolean("status", false)
         val edit = spf.edit()
 
@@ -168,8 +171,11 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
                     true -> {
                         edit.putBoolean("status", true).commit()
                         startService(serviceTracking)
+                        initLineMaps()
+
                     }
                     else -> {
+                        mRoutePolyline?.remove()
                         edit.putBoolean("status", false)
                         edit.putFloat("lat", 0.0.toFloat())
                         edit.putFloat("lng", 0.0.toFloat())
@@ -190,6 +196,7 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
             .withListener(object : PermissionListener {
                 override fun onPermissionGranted(response: PermissionGrantedResponse) { /* ... */
                     getLastLocation()
+
                 }
 
                 override fun onPermissionDenied(response: PermissionDeniedResponse) { /* ... */
@@ -292,43 +299,37 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
             }
         })
 
-
-        val directionsCall = HttpMapsConnect().getApiService().getDirections(
-            "13.981472713187685, 100.53894242836355",
-            "13.981872776682234, 100.54104165309973",
-            getString(R.string.google_maps_key)
-        )
-        directionsCall.enqueue(object : Callback<Directions> {
-            override fun onResponse(call: Call<Directions>, response: Response<Directions>) {
+        val comp = database.getReference().child("comp")
+        comp.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
 
 
-                val directions = response.body()!!
-
-                Log.e("dwld", "${directions}")
-                if (directions.status.equals("OK")) {
-
-                    val legs = directions.routes[0].legs[0]
-                    val route = Route(
-                        getString(R.string.app_name)
-                        ,
-                        getString(R.string.app_name),
-                        legs.start_location.lat,
-                        legs.start_location.lng,
-                        legs.end_location.lat,
-                        legs.end_location.lng,
-                        directions.routes[0].overview_polyline.points
-                    )
-                    setMarkersAndRoute(route)
-                } else {
-                    showToast(directions.status)
-                }
             }
 
+            override fun onDataChange(snapshot: DataSnapshot) {
 
-            override fun onFailure(call: Call<Directions>, t: Throwable) {
-                showToast(t.toString())
+
+//                mGoogleMap.clear()
+
+                for (ds in snapshot.getChildren()) {
+                    val radiusInMeters = ds.child("radiusInMeters").value.toString().toInt()
+                    val lat = ds.child("lat").getValue().toString().toDouble()
+                    val lng = ds.child("lng").getValue().toString().toDouble()
+
+                    val companyData = CompanyData(
+                        null, null, null, null, lat, lng
+                        , radiusInMeters
+                    )
+                    setSaveMarker(companyData)
+                    if (spf.getBoolean("status", false))
+                        initLineMaps()
+
+//                    Log.e("dld", "${lat}")
+                }
+
             }
         })
+
 
     }
 
@@ -355,9 +356,9 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
 
 //                markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
-            Log.e("ok", "kk")
+        Log.e("ok", "kk")
 //        Log.e("dds","${Constant.BASE_URL}${url}")
-            nameTV.text = "${name}"
+        nameTV.text = "ฉัน"
 
         markerImv.setImageBitmap(url)
 
@@ -389,105 +390,105 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 //            })
 //            .into(markerImv);
 
-            val displayMetrics = DisplayMetrics()
-            (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
-            marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
-            marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
-            marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-            marker.buildDrawingCache()
-            val bitmap = Bitmap.createBitmap(
-                marker.measuredWidth,
-                marker.measuredHeight,
-                Bitmap.Config.ARGB_8888
-            )
-            val canvas = Canvas(bitmap)
-            marker.draw(canvas)
-            return bitmap
-        }
+        val displayMetrics = DisplayMetrics()
+        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+        marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
+        marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+        marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+        marker.buildDrawingCache()
+        val bitmap = Bitmap.createBitmap(
+            marker.measuredWidth,
+            marker.measuredHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        marker.draw(canvas)
+        return bitmap
+    }
 
 
-        fun getBitmapFromURL(src: String): Bitmap? {
-            return try {
-                Log.e("src", src!!)
-                val url = URL(src)
-                val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
-                connection.setDoInput(true)
-                connection.connect()
-                val input: InputStream = connection.getInputStream()
-                val myBitmap =
-                    BitmapFactory.decodeStream(input)
-                Log.e("Bitmap", "returned")
-                myBitmap
-            } catch (e: IOException) {
-                e.printStackTrace()
+    fun getBitmapFromURL(src: String): Bitmap? {
+        return try {
+            Log.e("src", src!!)
+            val url = URL(src)
+            val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+            connection.setDoInput(true)
+            connection.connect()
+            val input: InputStream = connection.getInputStream()
+            val myBitmap =
+                BitmapFactory.decodeStream(input)
+            Log.e("Bitmap", "returned")
+            myBitmap
+        } catch (e: IOException) {
+            e.printStackTrace()
 //            Log.e("Exception", e.message?)
+            null
+        }
+    }
+
+    fun createCustomMarkerShop(
+        context: Context,
+        @DrawableRes resource: Int,
+        _name: String?
+    ): Bitmap? {
+        val marker =
+            (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+                R.layout.custom_marker_layout_shop,
                 null
-            }
-        }
-
-        fun createCustomMarkerShop(
-            context: Context,
-            @DrawableRes resource: Int,
-            _name: String?
-        ): Bitmap? {
-            val marker =
-                (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
-                    R.layout.custom_marker_layout_shop,
-                    null
-                )
-
-
-            val displayMetrics = DisplayMetrics()
-            (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
-            marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
-            marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
-            marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-            marker.buildDrawingCache()
-            val bitmap = Bitmap.createBitmap(
-                marker.measuredWidth,
-                marker.measuredHeight,
-                Bitmap.Config.ARGB_8888
             )
-            val canvas = Canvas(bitmap)
-            marker.draw(canvas)
-            return bitmap
-        }
 
 
-        fun createCustomMarkerFire(
-            context: Context,
-            @DrawableRes resource: Int,
-            _name: String?
-        ): Bitmap? {
-            val marker =
-                (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
-                    R.layout.custom_marker_fire_layout,
-                    null
-                )
-            //        markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
+        val displayMetrics = DisplayMetrics()
+        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+        marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
+        marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+        marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+        marker.buildDrawingCache()
+        val bitmap = Bitmap.createBitmap(
+            marker.measuredWidth,
+            marker.measuredHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        marker.draw(canvas)
+        return bitmap
+    }
 
-            //        Glide.with(this).load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s").into(markerImage);
-            val displayMetrics = DisplayMetrics()
-            (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
-            marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
-            marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
-            marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-            marker.buildDrawingCache()
-            val bitmap = Bitmap.createBitmap(
-                marker.measuredWidth,
-                marker.measuredHeight,
-                Bitmap.Config.ARGB_8888
+
+    fun createCustomMarkerFire(
+        context: Context,
+        @DrawableRes resource: Int,
+        _name: String?
+    ): Bitmap? {
+        val marker =
+            (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+                R.layout.custom_marker_fire_layout,
+                null
             )
-            val canvas = Canvas(bitmap)
-            marker.draw(canvas)
-            return bitmap
-        }
+        //        markerImage.setImageDrawable(loadImageFromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s","s"));
+
+        //        Glide.with(this).load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQODPla_2AWvBB453c2bmZft9afyH0_-UWRXmj6BV9D7U0WJHu1&s").into(markerImage);
+        val displayMetrics = DisplayMetrics()
+        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+        marker.layoutParams = ViewGroup.LayoutParams(52, ViewGroup.LayoutParams.WRAP_CONTENT)
+        marker.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+        marker.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+        marker.buildDrawingCache()
+        val bitmap = Bitmap.createBitmap(
+            marker.measuredWidth,
+            marker.measuredHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        marker.draw(canvas)
+        return bitmap
+    }
 
 //100.539393
 
-        fun setMarkersAndRoute(route: Route) {
+    fun setMarkersAndRoute(route: Route) {
 
-            val startLatLng = LatLng(route.startLat!!, route.startLng!!)
+        val startLatLng = LatLng(route.startLat!!, route.startLng!!)
 //        val startMarkerOptions: MarkerOptions =
 //            MarkerOptions().position(LatLng(13.981472713187685, 100.53894242836355))
 //                .title(route.startName).icon(
@@ -495,144 +496,148 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 //                        createCustomMarker(this, "", "Narender")
 //                    )
 //                )
-            val endLatLng = LatLng(route.endLat!!, route.endLng!!)
-            val endMarkerOptions: MarkerOptions =
-                MarkerOptions().position(LatLng(13.981872776682234, 100.54104165309973))
-                    .title(route.endName).icon(
-                        BitmapDescriptorFactory.fromBitmap(
-                            createCustomMarkerShop(this, R.drawable.bg_gradient, "Narender")
-                        )
+        val endLatLng = LatLng(route.endLat!!, route.endLng!!)
+        val endMarkerOptions: MarkerOptions =
+            MarkerOptions().position(LatLng(13.981872776682234, 100.54104165309973))
+                .title(route.endName).icon(
+                    BitmapDescriptorFactory.fromBitmap(
+                        createCustomMarkerShop(this, R.drawable.bg_gradient, "Narender")
                     )
+                )
 
 
-            val fireMarkerOptions: MarkerOptions =
-                MarkerOptions().position(LatLng(13.982201553484167, 100.539768506215))
-                    .title(route.endName).icon(
-                        BitmapDescriptorFactory.fromBitmap(
-                            createCustomMarkerFire(this, R.drawable.bg_gradient, "Narender")
-                        )
+        val fireMarkerOptions: MarkerOptions =
+            MarkerOptions().position(LatLng(13.982201553484167, 100.539768506215))
+                .title(route.endName).icon(
+                    BitmapDescriptorFactory.fromBitmap(
+                        createCustomMarkerFire(this, R.drawable.bg_gradient, "Narender")
                     )
+                )
 
-            val fire2MarkerOptions: MarkerOptions =
-                MarkerOptions().position(LatLng(13.981857160235363, 100.53938404802422))
-                    .title(route.endName).icon(
-                        BitmapDescriptorFactory.fromBitmap(
-                            createCustomMarkerFire(this, R.drawable.bg_gradient, "Narender")
-                        )
+        val fire2MarkerOptions: MarkerOptions =
+            MarkerOptions().position(LatLng(13.981857160235363, 100.53938404802422))
+                .title(route.endName).icon(
+                    BitmapDescriptorFactory.fromBitmap(
+                        createCustomMarkerFire(this, R.drawable.bg_gradient, "Narender")
                     )
+                )
 
 
 //        val startMarker = mGoogleMap!!.addMarker(startMarkerOptions)
 //        val endMarker = mGoogleMap!!.addMarker(endMarkerOptions)
 
 
-            mGoogleMap!!.addMarker(fireMarkerOptions)
-            mGoogleMap!!.addMarker(fire2MarkerOptions)
-//
-//        mRouteMarkerList.add(startMarker)
-//        mRouteMarkerList.add(endMarker)
+//            mGoogleMap!!.addMarker(fireMarkerOptions)
+//            mGoogleMap!!.addMarker(fire2MarkerOptions)
+        Log.e("ddd", "${currentLocationMarker} , ${compLocationMarker}")
+
+        if (currentLocationMarker != null && compLocationMarker != null) {
+            mRouteMarkerList = ArrayList()
+            mRouteMarkerList.add(currentLocationMarker!!)
+            mRouteMarkerList.add(compLocationMarker!!)
 ////
 //        mRouteMarkerList.add(startMarker)
 
 
 //
-//        val polylineOptions = drawRoute(this)
-//        val pointsList = PolyUtil.decode(route.overviewPolyline)
-//        for (point in pointsList) {
-//            polylineOptions.add(point)
-//        }
-//        polylineOptions.color(resources.getColor(R.color.colorPrimary));
-//        polylineOptions.width(10F);
-//
-//        mRoutePolyline = mGoogleMap!!.addPolyline(polylineOptions)
-//        mGoogleMap!!.animateCamera(MapsFactory.autoZoomLevel(mRouteMarkerList))
-
-        }
-
-        fun drawRoute(context: Context): PolylineOptions {
-            val polylineOptions = PolylineOptions()
-            polylineOptions.width(DisplayUtility.px2dip(context, 72.toFloat()).toFloat())
-            polylineOptions.geodesic(true)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                polylineOptions.color(context.resources.getColor(R.color.black, context.theme))
-            } else {
-                polylineOptions.color(context.resources.getColor(R.color.black))
+            val polylineOptions = drawRoute(this)
+            val pointsList = PolyUtil.decode(route.overviewPolyline)
+            for (point in pointsList) {
+                polylineOptions.add(point)
             }
-            return polylineOptions
+            polylineOptions.color(resources.getColor(R.color.colorPrimary));
+            polylineOptions.width(10F);
+
+            mRoutePolyline = mGoogleMap!!.addPolyline(polylineOptions)
+            mGoogleMap!!.animateCamera(MapsFactory.autoZoomLevel(mRouteMarkerList))
         }
+    }
 
-        override fun onPolylineClick(p0: Polyline?) {
+    fun drawRoute(context: Context): PolylineOptions {
+        val polylineOptions = PolylineOptions()
+        polylineOptions.width(DisplayUtility.px2dip(context, 72.toFloat()).toFloat())
+        polylineOptions.geodesic(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            polylineOptions.color(context.resources.getColor(R.color.black, context.theme))
+        } else {
+            polylineOptions.color(context.resources.getColor(R.color.black))
         }
+        return polylineOptions
+    }
 
-        override fun onPolygonClick(p0: Polygon?) {
-        }
+    override fun onPolylineClick(p0: Polyline?) {
+    }
 
-        private var currentLocationMarker: Marker? = null
+    override fun onPolygonClick(p0: Polygon?) {
+    }
 
-
-        @SuppressLint("MissingPermission")
-        private fun getLastLocation() {
-            mFusedLocationClient!!.lastLocation
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful && task.result != null) {
+    private var currentLocationMarker: Marker? = null
 
 
-                        Log.e("dldl", "dl;;;;")
-                        //  currentLocationMarker?.remove()
+    @SuppressLint("MissingPermission")
+    private fun getLastLocation() {
+        mFusedLocationClient!!.lastLocation
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful && task.result != null) {
 
-                        showToast("ldl")
 
-                        currentLocationMarker?.let {
+                    Log.e("dldl", "dl;;;;")
+                    //  currentLocationMarker?.remove()
+
+                    showToast("ldl")
+
+                    currentLocationMarker?.let {
 
 
 //                        position.latitude = 0.0
 
-                        } ?: kotlin.run {
-                            location = LatLng(task.result.latitude, task.result.longitude)
+                    } ?: kotlin.run {
+                        location = LatLng(task.result.latitude, task.result.longitude)
 
-                            GlobalScope.launch(Dispatchers.Main) {
+                        GlobalScope.launch(Dispatchers.Main) {
 
 
 //            var im:Bitmap? = null
-                                withContext(Dispatchers.IO) {
-                                    try {
-                                        val url = URL("${Constant.BASE_URL}${user.avatar}")
-                                        val connection =
-                                            url.openConnection() as HttpURLConnection
-                                        connection.doInput = true
-                                        connection.connect()
-                                        val input = connection.inputStream
-                                        val im = BitmapFactory.decodeStream(input)
+                            withContext(Dispatchers.IO) {
+                                try {
+                                    val url = URL("${Constant.BASE_URL}${user.avatar}")
+                                    val connection =
+                                        url.openConnection() as HttpURLConnection
+                                    connection.doInput = true
+                                    connection.connect()
+                                    val input = connection.inputStream
+                                    val im = BitmapFactory.decodeStream(input)
 
 
-                                        withContext(Dispatchers.Main){
+                                    withContext(Dispatchers.Main) {
 //                                            markerImv.setImageBitmap(im)
-                                            showToast("ooooss")
-                                            avatarImg.setImageBitmap(im)
-                                            val mrkerOptions: MarkerOptions =
-                                                MarkerOptions().position(location!!).title("").icon(
-                                                    BitmapDescriptorFactory.fromBitmap(
-                                                        createCustomMarker(
-                                                            this@MainMapsActivity,
-                                                            im,
-                                                            "${user.display_name}"
-                                                        )
+                                        showToast("ooooss")
+                                        avatarImg.setImageBitmap(im)
+                                        val mrkerOptions: MarkerOptions =
+                                            MarkerOptions().position(location!!).title("").icon(
+                                                BitmapDescriptorFactory.fromBitmap(
+                                                    createCustomMarker(
+                                                        this@MainMapsActivity,
+                                                        im,
+                                                        "${user.display_name}"
                                                     )
                                                 )
-                                            currentLocationMarker = mGoogleMap?.addMarker(mrkerOptions)
+                                            )
+                                        currentLocationMarker = mGoogleMap?.addMarker(mrkerOptions)
 
-                                        }
-                                    } catch (e: IOException) {
-                                        e.printStackTrace()
-                                        null
+                                        if (spf.getBoolean("status", false))
+                                            initLineMaps()
+
+
                                     }
+                                } catch (e: IOException) {
+                                    e.printStackTrace()
+                                    null
                                 }
-
-
-
                             }
 
 
+                        }
 
 
 //                        Handler().postDelayed({
@@ -647,210 +652,282 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 //                        }
 
 
-                        }
+                    }
 
 //                    currentLocationMarker.g
 
-                    } else {
-                        showToast("Err")
-                    }
-                }
-        }
-
-        fun setMarker(locate: LatLng) {
-
-        }
-
-
-        inner class CallComp : Callback<CompanyData> {
-
-            init {
-                showProgressDialog()
-            }
-
-            override fun onFailure(call: Call<CompanyData>, t: Throwable) {
-                showToast("err")
-                hideDialog()
-            }
-
-            override fun onResponse(call: Call<CompanyData>, response: Response<CompanyData>) {
-                hideDialog()
-
-                if (response.isSuccessful) {
-
-                    response.body()?.let {
-
-                        companyData = it
-                        setSaveMarker(it)
-
-                    }
-
                 } else {
-                    showToast("err")
-
+                    showToast("Err")
                 }
             }
+    }
+
+    fun setMarker(locate: LatLng) {
+
+    }
+
+
+    inner class CallComp : Callback<CompanyData> {
+
+        init {
+            showProgressDialog()
         }
 
+        override fun onFailure(call: Call<CompanyData>, t: Throwable) {
+            showToast("err")
+            hideDialog()
+        }
 
-        inner class CallWorning : Callback<WorningData> {
+        override fun onResponse(call: Call<CompanyData>, response: Response<CompanyData>) {
+            hideDialog()
 
-            init {
-//            showProgressDialog()
-            }
+            if (response.isSuccessful) {
 
-            override fun onFailure(call: Call<WorningData>, t: Throwable) {
+                response.body()?.let {
+
+
+                }
+
+            } else {
                 showToast("err")
-                hideDialog()
+
+            }
+        }
+    }
+
+
+    fun initLineMaps() {
+
+        if (mRoutePolyline != null)
+            mRoutePolyline?.remove()
+
+//       Log.e("lat1","${currentLocationMarker?.position?.latitude},${currentLocationMarker?.position?.longitude}")
+//       Log.e("lat2","${compLocationMarker?.position?.latitude},${compLocationMarker?.position?.longitude}")
+        val directionsCall = HttpMapsConnect().getApiService().getDirections(
+            "${currentLocationMarker?.position?.latitude},${currentLocationMarker?.position?.longitude}",
+            "${compLocationMarker?.position?.latitude},${compLocationMarker?.position?.longitude}",
+            getString(R.string.google_maps_key)
+        )
+        directionsCall.enqueue(object : Callback<Directions> {
+            override fun onResponse(call: Call<Directions>, response: Response<Directions>) {
+
+
+                val directions = response.body()!!
+
+                Log.e("dwld", "${directions}")
+                if (directions.status.equals("OK")) {
+
+                    Log.e("dsaq", "ok")
+                    val legs = directions.routes[0].legs[0]
+                    val route = Route(
+                        getString(R.string.app_name)
+                        ,
+                        getString(R.string.app_name),
+                        legs.start_location.lat,
+                        legs.start_location.lng,
+                        legs.end_location.lat,
+                        legs.end_location.lng,
+                        directions.routes[0].overview_polyline.points
+                    )
+                    setMarkersAndRoute(route)
+                } else {
+                    Log.e("ddd1", "${directions.status}")
+
+//                    showToast(directions.status)
+                }
             }
 
-            override fun onResponse(call: Call<WorningData>, response: Response<WorningData>) {
-                hideDialog()
 
-                if (response.isSuccessful) {
+            override fun onFailure(call: Call<Directions>, t: Throwable) {
+                Log.e("ddd", "${t.message}")
+                showToast(t.toString())
+            }
+        })
 
-                    response.body()?.let {
+    }
+
+    inner class CallWorning : Callback<WorningData> {
+
+        init {
+//            showProgressDialog()
+        }
+
+        override fun onFailure(call: Call<WorningData>, t: Throwable) {
+            showToast("err")
+            hideDialog()
+        }
+
+        override fun onResponse(call: Call<WorningData>, response: Response<WorningData>) {
+            hideDialog()
+
+            if (response.isSuccessful) {
+
+                response.body()?.let {
 
 
-                        for (mark in listMark) {
-                            mark.remove()
-                        }
-                        listMark.clear()
+                    for (mark in listMark) {
+                        mark.remove()
+                    }
+                    listMark.clear()
 
 
-                        for (data in it) {
+                    for (data in it) {
 
-                            val markerOptions: MarkerOptions = MarkerOptions().position(
-                                LatLng(
-                                    data.lat!!,
-                                    data.lng!!
-                                )
-                            ).title("").icon(
-                                BitmapDescriptorFactory.fromBitmap(
-                                    createCustomMarkerFire(
-                                        this@MainMapsActivity,
-                                        R.drawable.bg_gradient,
-                                        "Narender"
-                                    )
+                        val markerOptions: MarkerOptions = MarkerOptions().position(
+                            LatLng(
+                                data.lat!!,
+                                data.lng!!
+                            )
+                        ).title("").icon(
+                            BitmapDescriptorFactory.fromBitmap(
+                                createCustomMarkerFire(
+                                    this@MainMapsActivity,
+                                    R.drawable.bg_gradient,
+                                    "Narender"
                                 )
                             )
-                            val da = mGoogleMap?.addMarker(markerOptions)
-                            da!!.tag = data
-                            listMark.add(da)
-                        }
+                        )
+                        val da = mGoogleMap?.addMarker(markerOptions)
+                        da!!.tag = data
+                        listMark.add(da)
+                    }
 //                    Log.e("ddd","${it.size}")
 
 
-                    }
-
-                } else {
-                    showToast("err")
-
                 }
-            }
 
+            } else {
+                showToast("err")
+
+            }
         }
 
-
-        val listMark = ArrayList<Marker>()
-
-        private var compLocationMarker: Marker? = null
+    }
 
 
-        fun setSaveMarker(companyData: CompanyData) {
+    val listMark = ArrayList<Marker>()
 
-            compLocationMarker?.remove()
-            val markerOptions: MarkerOptions = MarkerOptions().position(
+    private var compLocationMarker: Marker? = null
+
+
+    fun setSaveMarker(companyData: CompanyData) {
+
+        compLocationMarker?.remove()
+
+        drawMarkerWithCircle(
+            LatLng(
+                companyData.location_evacuate_lat!!,
+                companyData.location_evacuate_lng!!
+            ), companyData.distance!!
+        )
+
+        val markerOptions: MarkerOptions = MarkerOptions().position(
+            LatLng(
+                companyData.location_evacuate_lat!!,
+                companyData.location_evacuate_lng!!
+            )
+        ).title("").icon(
+            BitmapDescriptorFactory.fromBitmap(
+                createCustomMarkerShop(this, R.drawable.bg_gradient, "Narender")
+            )
+        )
+        mGoogleMap!!.animateCamera(
+            CameraUpdateFactory.newLatLngZoom(
                 LatLng(
                     companyData.location_evacuate_lat!!,
                     companyData.location_evacuate_lng!!
-                )
-            ).title("").icon(
-                BitmapDescriptorFactory.fromBitmap(
-                    createCustomMarkerShop(this, R.drawable.bg_gradient, "Narender")
-                )
+                ), 18.0f
             )
-            mGoogleMap!!.animateCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    LatLng(
-                        companyData.location_company_lat!!,
-                        companyData.location_company_lng!!
-                    ), 18.0f
-                )
-            );
+        );
 
-            compLocationMarker = mGoogleMap?.addMarker(markerOptions)
-
-        }
-
-        private fun updateLocation() {
-
-            builLocationRequest()
-            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return
-            }
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, getPendingIntent())
-
-        }
-
-        private fun getPendingIntent(): PendingIntent? {
-            val intents = Intent(this, MyLocationService::class.java)
-            intents.setAction(MyLocationService.ACTION_PROCESS_UPDATE)
-            return PendingIntent.getBroadcast(this, 0, intents, PendingIntent.FLAG_UPDATE_CURRENT)
-        }
-
-        lateinit var locationRequest: LocationRequest
-
-        private fun builLocationRequest() {
-            locationRequest = LocationRequest.create().apply {
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                interval = 100
-            }
-
-        }
-
-        override fun onMarkerClick(marker: Marker?): Boolean {
-
-            try {
-                data = marker?.tag as WorningDataItem
-                nameTV.text = "${data?.user!!.display_name}"
-                topicTV.text = "${data?.w_topic}"
-                descTV.text = "${data?.w_desc}"
-                Glide.with(this).load("${Constant.BASE_URL}${data?.user!!.avatar}").into(avatarImg)
-                boxWorn.visibility = View.VISIBLE
-//            imageSlider.visibility = View.GONE
-                actionHide(actionHide)
-
-            } catch (ex: TypeCastException) {
-            }
-
-            return true
-
-        }
-
-        override fun onItemClick(view: View, position: Int, action: Int) {
-
-
-            ImageViewer.Builder(this, sliderItemListURL)
-                .setStartPosition(position)
-                .show()
-
-        }
-
+        compLocationMarker = mGoogleMap?.addMarker(markerOptions)
 
     }
+
+    private fun updateLocation() {
+
+        builLocationRequest()
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, getPendingIntent())
+
+    }
+
+    private fun getPendingIntent(): PendingIntent? {
+        val intents = Intent(this, MyLocationService::class.java)
+        intents.setAction(MyLocationService.ACTION_PROCESS_UPDATE)
+        return PendingIntent.getBroadcast(this, 0, intents, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    lateinit var locationRequest: LocationRequest
+
+    private fun builLocationRequest() {
+        locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = 100
+        }
+
+    }
+
+    override fun onMarkerClick(marker: Marker?): Boolean {
+
+        try {
+            data = marker?.tag as WorningDataItem
+            nameTV.text = "${data?.user!!.display_name}"
+            topicTV.text = "${data?.w_topic}"
+            descTV.text = "${data?.w_desc}"
+            Glide.with(this).load("${Constant.BASE_URL}${data?.user!!.avatar}").into(avatarImg)
+            boxWorn.visibility = View.VISIBLE
+//            imageSlider.visibility = View.GONE
+            actionHide(actionHide)
+
+        } catch (ex: TypeCastException) {
+        }
+
+        return true
+
+    }
+
+    override fun onItemClick(view: View, position: Int, action: Int) {
+
+
+        ImageViewer.Builder(this, sliderItemListURL)
+            .setStartPosition(position)
+            .show()
+
+    }
+
+
+    private fun drawMarkerWithCircle(position: LatLng, distance: Int) {
+
+        cicleMarker?.remove()
+        val radiusInMeters = 50.0
+        val strokeColor = -0x10000 //red outline
+        val shadeColor = 0x44ff0000 //opaque red fill
+        val circleOptions: CircleOptions =
+            CircleOptions().center(position).radius(distance.toDouble())
+                .fillColor(resources.getColor(R.color.colorGreeTran))
+                .strokeColor(resources.getColor(R.color.colorGreen)).strokeWidth(8.toFloat())
+        cicleMarker = mGoogleMap?.addCircle(circleOptions)
+//        val markerOptions = MarkerOptions().position(position)
+//        mMarker = mGoogleMap.addMarker(markerOptions)
+    }
+
+
+}

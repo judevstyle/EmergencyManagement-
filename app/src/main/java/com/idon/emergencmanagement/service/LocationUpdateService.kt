@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
+import com.idon.emergencmanagement.model.CompanyData
 import com.idon.emergencmanagement.model.UserFull
 import com.idon.emergencmanagement.view.activity.AlermActivity
 import com.zine.ketotime.util.Constant
@@ -31,6 +32,7 @@ import com.zine.ketotime.util.Constant
 
 class LocationUpdateService : Service() {
 
+    private  var companyData: CompanyData? = null
     private lateinit var myRefLocation: DatabaseReference
     lateinit var user: UserFull
     lateinit var spf: SharedPreferences
@@ -94,6 +96,36 @@ class LocationUpdateService : Service() {
         val database = Firebase.database
         val myRef = database.getReference().child("worning")
         myRefLocation = database.getReference().child("location")
+
+
+        val comp = database.getReference().child("comp")
+        comp.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+
+
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+
+//                mGoogleMap.clear()
+
+                for (ds in snapshot.getChildren()) {
+                    val radiusInMeters = ds.child("radiusInMeters").value.toString().toInt()
+                    val lat = ds.child("lat").getValue().toString().toDouble()
+                    val lng = ds.child("lng").getValue().toString().toDouble()
+
+                    companyData = CompanyData(
+                        null, null, null, null, lat, lng
+                        , radiusInMeters
+                    )
+
+
+                }
+
+            }
+        })
+
 
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
@@ -167,8 +199,8 @@ class LocationUpdateService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Toast.makeText(context,"disldwo",Toast.LENGTH_SHORT).show()
-        Log.e("dlp","distroy")
+//        Toast.makeText(context,"disldwo",Toast.LENGTH_SHORT).show()
+        Log.e("dlp", "distroy")
         if (wakelock != null) {
             wakelock?.release();
             wakelock = null
@@ -212,39 +244,50 @@ class LocationUpdateService : Service() {
                 val currentLocation: Location = locationResult.lastLocation
 
 
+                val metter = distanceBetween(
+                    currentLocation.latitude,
+                    currentLocation.longitude,
+                    spf.getFloat("lat", 0.0.toFloat()).toDouble(),
+                    spf.getFloat("lng", 0.0.toFloat()).toDouble()
+                )
 
-               val metter = distanceBetween(currentLocation.latitude,currentLocation.longitude,spf.getFloat("lat",0.0.toFloat()).toDouble(),spf.getFloat("lng",0.0.toFloat()).toDouble())
+
+                if (companyData != null) {
+                    val metterDistance = distanceBetween(
+                        currentLocation.latitude,
+                        currentLocation.longitude,
+                        companyData!!.location_evacuate_lat!!,
+                        companyData!!.location_evacuate_lng!!
+                    )
 
 
-                if (metter > 5){
+                    Log.e("metterDistance","${metterDistance}")
+                }
+
+
+                if (metter > 5) {
 
                     val edit = spf.edit()
-                    edit.putFloat("lat",currentLocation.latitude.toFloat())
-                    edit.putFloat("lng",currentLocation.longitude.toFloat())
+                    edit.putFloat("lat", currentLocation.latitude.toFloat())
+                    edit.putFloat("lng", currentLocation.longitude.toFloat())
                     edit.commit()
 
-                    val data =  HashMap<String,Any>()
-                    data.put("lat",currentLocation.latitude)
-                    data.put("lng",currentLocation.longitude)
-                    data.put("data",spf!!.getString(Constant._UDATA,"{}")!!)
+                    val data = HashMap<String, Any>()
+                    data.put("lat", currentLocation.latitude)
+                    data.put("lng", currentLocation.longitude)
+                    data.put("data", spf!!.getString(Constant._UDATA, "{}")!!)
                     myRefLocation.child(user.uid!!).setValue(data)
 
                 }
 
 
-
-
-            }else {
+            } else {
                 mFusedLocationClient?.removeLocationUpdates(
                     this
                 )
 
                 myRefLocation.child(user.uid!!).removeValue()
             }
-
-
-
-
 
 
 //
@@ -321,7 +364,6 @@ class LocationUpdateService : Service() {
     private fun deg2rad(deg: Double): Double {
         return deg * Math.PI / 180.0
     }
-
 
 
 }

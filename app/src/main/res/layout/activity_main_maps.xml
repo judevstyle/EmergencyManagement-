@@ -201,15 +201,34 @@
 
 
     </androidx.cardview.widget.CardView>
-    <com.github.angads25.toggle.widget.LabeledSwitch
-        android:id="@+id/switchStatus"
+
+
+    <LinearLayout
+        android:background="@drawable/bg_input"
+        android:padding="@dimen/dimen8"
+        android:layout_marginRight="@dimen/dimen4"
+        android:layout_marginTop="52dp"
+        android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:textSize="14sp"
-        app:on="false"
-        android:layout_alignParentBottom="true"
-        app:colorBorder="@color/colorAccent"/>
+        android:orientation="vertical">
+
+        <com.github.angads25.toggle.widget.LabeledSwitch
+            android:id="@+id/switchStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            app:on="false"
+            android:layout_gravity="center"
+            app:colorBorder="@color/colorPrimary"/>
+        <com.zine.ketotime.view.CustomTextView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="เปิดใช้งานการติดตามพิกัด"/>
+    </LinearLayout>
+
     <!--    <androidx.appcompat.widget.AppCompatButton-->
     <!--        android:layout_width="match_parent"-->
     <!--        android:layout_height="@dimen/higth_button"-->
