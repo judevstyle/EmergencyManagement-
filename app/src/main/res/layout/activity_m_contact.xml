@@ -70,7 +70,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="ชื่อที่แสดง" />
+                                android:text="ชื่อ" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -84,9 +84,36 @@
 
 
                         <EditText
-                            android:id="@+id/displayNameET"
+                            android:id="@+id/nameET"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:text="" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/dimen8"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="จุดที่รับผิดชอบ" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="2dp"
+                                android:text="*"
+                                android:textColor="@color/red" />
+
+
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/jobPositionET"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
                             android:text="" />
 
                         <LinearLayout
@@ -118,120 +145,21 @@
                             android:text="" />
 
 
-
-                        <TextView
-                            android:layout_marginTop="@dimen/dimen8"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="เพศ" />
-                        <RadioGroup  android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-                            <RadioButton android:id="@+id/radio_visible"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Visitor"
-                                android:onClick="onRadioButtonClicked"/>
-                            <RadioButton android:id="@+id/radio_employee"
-                                android:layout_marginLeft="@dimen/dimen12"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Employee"
-                                android:onClick="onRadioButtonClicked"/>
-                        </RadioGroup>
-
-
-
-
-                    </LinearLayout>
-
-
-                </androidx.cardview.widget.CardView>
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/dimen12">
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="@dimen/dimen12"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="ข้อมูลการเข้าสู่ระบบ"
-                            android:textSize="@dimen/txt18" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/dimen12"
-                            android:text="Username" />
-
-                        <EditText
-                            android:id="@+id/userET"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="รหัสผ่าน" />
-
-                                <EditText
-                                    android:id="@+id/passET"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="" />
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="ยืนยันรหัสผ่าน" />
-
-                                <EditText
-                                    android:id="@+id/passCFET"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:text="" />
-                            </LinearLayout>
-
-
-                        </LinearLayout>
-
-                        <androidx.appcompat.widget.AppCompatButton
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                        <com.zine.ketotime.view.CustomButton
                             android:layout_marginTop="@dimen/dimen12"
                             android:background="@drawable/bg_input_button_primary"
+                            android:layout_width="match_parent"
+                            android:textColor="@color/white"
                             android:onClick="actionCommit"
-                            android:text="ลงทะเบียน"
-                            android:textColor="@color/white" />
+                            android:layout_height="@dimen/higth_button"
+                            android:text="บันทึก"/>
+
+
 
 
                     </LinearLayout>
+
+
                 </androidx.cardview.widget.CardView>
 
 

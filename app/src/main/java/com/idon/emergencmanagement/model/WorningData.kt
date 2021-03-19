@@ -37,5 +37,7 @@ data class User(
     var fname: String?,
     var lname: String?,
     var uid: String?,
-    var type: Int?
+    var type: String?,
+    var type_of_user: Int?
+
 ):Parcelable

@@ -13,7 +13,8 @@ import com.tt.workfinders.BaseClass.BaseActivity
 import com.zine.ketotime.util.Constant
 import kotlinx.android.synthetic.main.activity_main_menu.*
 
-class MenuApproveActivity : BaseActivity(){
+class MenuAdminActivity : BaseActivity(){
+
 
 
 
@@ -21,44 +22,26 @@ class MenuApproveActivity : BaseActivity(){
     lateinit var spf: SharedPreferences
 
     lateinit var userFull :UserFull
-
     override fun getContentView(): Int {
         spf = getSharedPreferences(Constant._PREFERENCES_NAME, Context.MODE_PRIVATE)
-        return R.layout.activity_main_menu
+        return R.layout.activity_main_menu_admin
     }
+
 
     override fun onViewReady(savedInstanceState: Bundle?, intent: Intent?) {
         super.onViewReady(savedInstanceState, intent)
 
 
-        val gson = Gson()
-        userFull = gson.fromJson(spf.getString(Constant._UDATA,"{}"),UserFull::class.java)
+
+            val gson = Gson()
+            userFull = gson.fromJson(spf.getString(Constant._UDATA,"{}"), UserFull::class.java)
 
 
-        Glide.with(this).load("${Constant.BASE_URL}${userFull.avatar}").into(avatarIM)
-        nameTV.text = "${userFull.display_name}"
+            Glide.with(this).load("${Constant.BASE_URL}${userFull.avatar}").into(avatarIM)
+            nameTV.text = "${userFull.display_name}"
 
 
-    }
 
-
-    fun actionWorning(view: View) {
-
-    }
-    fun actionRequest(view: View) {
-
-        startActivity(Intent(this,WorningRequestActivity::class.java))
-
-
-    }
-    fun checkIn(view: View) {
-        startActivity(Intent(this,MapsCheckIn::class.java))
-
-    }
-
-    fun actionContact(view: View) {
-
-        startActivity(Intent(this,ContactActivity::class.java))
 
     }
 
@@ -66,12 +49,25 @@ class MenuApproveActivity : BaseActivity(){
 
         val edit = spf.edit()
         edit.clear().commit()
-        val intent = Intent(this, LoginActivity::class.java)
+       val intent = Intent(this, LoginActivity::class.java)
         intent.flags =
             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
 
 
     }
+    fun actionSetting(view: View) {
 
+        startActivity(Intent(this,CompanySettingActivity::class.java))
+
+    }
+    fun actionContact(view: View) {
+        startActivity(Intent(this,ContactforAdminActivity::class.java))
+
+    }
+
+    fun actionAdd(view: View) {
+        startActivity(Intent(this,AddmemberActivity::class.java))
+
+    }
 }

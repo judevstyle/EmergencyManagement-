@@ -49,12 +49,18 @@ class ContactAdapter(
 
     }
 
+    fun clear(){
+        this.items?.clear()
+        notifyDataSetChanged()
+
+    }
 
     override fun getItemCount(): Int {
 //        Log.e("dd","sl ${items!!.size}")
 
         if (items == null) return 0
         return items!!.size
+
     }
 
 

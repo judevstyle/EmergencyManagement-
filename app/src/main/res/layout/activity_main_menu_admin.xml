@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/main_bg"
+    android:orientation="vertical"
+    tools:context=".view.activity.MenuAdminActivity"
+    >
+
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/avatarIM"
+        android:layout_width="80dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/dimen24"
+        android:layout_alignParentRight="true"
+        android:layout_height="80dp"
+        android:src="@drawable/test_user"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="test"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:id="@+id/nameTV"
+        android:textSize="18sp"
+        />
+
+
+    <FrameLayout
+        android:layout_marginTop="@dimen/dimen12"
+        android:background="@drawable/bg_main_menu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_marginTop="34dp"
+                android:layout_marginRight="@dimen/dimen12"
+                android:textSize="28sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Menu"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/gray700"/>
+            <TextView
+                android:onClick="actionLogout"
+                android:id="@+id/actionAuth"
+                android:layout_marginTop="2dp"
+                android:paddingBottom="@dimen/dimen8"
+                android:paddingRight="@dimen/dimen8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ออกจากระบบ"/>
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:onClick="actionSetting"
+                    android:layout_marginRight="8dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <include layout="@layout/menu_comp"/>
+
+                </FrameLayout>
+                <FrameLayout
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:onClick="actionContact"
+                    android:layout_marginLeft="8dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <include layout="@layout/menu_contact"/>
+
+                </FrameLayout>
+
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen12"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:onClick="actionAdd"
+                    android:layout_marginRight="8dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <include layout="@layout/menu_add_user"/>
+
+                </FrameLayout>
+                <FrameLayout
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:onClick="actionContact"
+                    android:layout_marginLeft="8dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+
+                </FrameLayout>
+
+
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>

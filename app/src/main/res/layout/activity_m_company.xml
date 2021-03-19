@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".view.activity.CompanySettingActivity"
+    android:orientation="vertical">
+
+
+    <include layout="@layout/toolbar_title"/>
+
+    <ScrollView
+        android:fillViewport="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_margin="@dimen/dimen12"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ชื่อบริษัท"/>
+
+            <EditText
+                android:padding="@dimen/dimen4"
+                android:background="@drawable/bg_input"
+                android:id="@+id/nameET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+
+
+
+            <FrameLayout
+                android:layout_marginTop="@dimen/dimen12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_gravity="bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="จุดรวมพล"/>
+
+                <TextView
+                    android:id="@+id/actionSelectMaps"
+                    android:onClick="actionSelectMaps"
+                    android:drawableRight="@drawable/ic_baseline_map_24"
+                    android:drawableTint="@color/colorPrimary"
+                    android:textColor="@color/colorPrimary"
+                    android:padding="@dimen/dimen4"
+                    android:layout_gravity="right"
+                    android:gravity="bottom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="เลือกจุดเตือนภัย"/>
+
+            </FrameLayout>
+
+
+            <fragment
+                android:id="@+id/maps"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="160dp" />
+
+            <TextView
+                android:layout_marginTop="@dimen/dimen12"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ระยะของจุดรวมพล (เมตร)"/>
+
+            <EditText
+                android:padding="@dimen/dimen4"
+                android:background="@drawable/bg_input"
+                android:id="@+id/distanceET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLines="1"/>
+
+
+            <com.zine.ketotime.view.CustomButton
+                android:layout_marginTop="@dimen/dimen12"
+                android:background="@drawable/bg_input_button_primary"
+                android:layout_width="match_parent"
+                android:textColor="@color/white"
+                android:onClick="actionCommit"
+                android:layout_height="@dimen/higth_button"
+                android:text="บันทึก"/>
+
+
+
+
+        </LinearLayout>
+
+
+
+    </ScrollView>
+
+
+</LinearLayout>

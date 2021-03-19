@@ -38,6 +38,9 @@ class LoginActivity : BaseActivity(){
             val dataclass = gson.fromJson<UserFull>(spf.getString(Constant._UDATA,""),UserFull::class.java)
             if (dataclass.type_of_user!! == 1)
                 intent = Intent(this@LoginActivity, MainMapsActivity::class.java)
+
+            else if (dataclass.type_of_user!! == 3)
+                intent = Intent(this@LoginActivity, MenuAdminActivity::class.java)
             else
                 intent = Intent(this@LoginActivity, MenuApproveActivity::class.java)
 
@@ -163,6 +166,10 @@ class LoginActivity : BaseActivity(){
 
                         if (it.type_of_user!! == 1)
                         intent = Intent(this@LoginActivity, MainMapsActivity::class.java)
+
+                        if (it.type_of_user!! == 3)
+                            intent = Intent(this@LoginActivity, MenuAdminActivity::class.java)
+
                         else
                             intent = Intent(this@LoginActivity, MenuApproveActivity::class.java)
 

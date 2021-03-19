@@ -78,7 +78,12 @@
         <activity android:name=".view.activity.WorningRequestDescActivity"/>
         <activity android:name=".view.activity.CheckInListActivity"/>
         <activity android:name=".view.activity.ContactActivity"/>
+        <activity android:name=".view.activity.CompanySettingActivity"/>
 
+        <activity android:name=".view.activity.AddmemberActivity"/>
+        <activity android:name=".view.activity.ContactforAdminActivity"/>
+        <activity android:name=".view.activity.MContactActivity"/>
+        <activity android:name=".view.activity.MenuAdminActivity"/>
         <activity android:name=".view.activity.MapsCheckIn"/>
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"

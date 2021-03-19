@@ -18,9 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.idon.emergencmanagement.R
-import com.idon.emergencmanagement.model.ResponeUserDao
-import com.idon.emergencmanagement.model.User
-import com.idon.emergencmanagement.model.UserFull
+import com.idon.emergencmanagement.model.*
 import com.idon.emergencmanagement.util.FileUtil
 import com.tt.workfinders.BaseClass.BaseActivity
 import com.yalantis.ucrop.UCrop
@@ -28,7 +26,12 @@ import com.zine.ketotime.network.HttpMainConnect
 import com.zine.ketotime.util.Constant._PREFERENCES_NAME
 import com.zine.ketotime.util.Constant._UDATA
 import id.zelory.compressor.Compressor
+import kotlinx.android.synthetic.main.activity_m_company.*
+import kotlinx.android.synthetic.main.activity_m_company.nameET
+import kotlinx.android.synthetic.main.activity_m_contact.*
 import kotlinx.android.synthetic.main.activity_register.*
+import kotlinx.android.synthetic.main.activity_register.avatarIM
+import kotlinx.android.synthetic.main.activity_register.telET
 import kotlinx.android.synthetic.main.toolbar_title.*
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -40,7 +43,7 @@ import java.io.IOException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class RegisterActivity : BaseActivity() {
+class MContactActivity : BaseActivity() {
 
     lateinit var spf: SharedPreferences
     var gendar: String = ""
@@ -54,7 +57,7 @@ class RegisterActivity : BaseActivity() {
     private var compressedImage: File? = null
 
     override fun getContentView(): Int {
-        return R.layout.activity_register
+        return R.layout.activity_m_contact
     }
 
     override fun onViewReady(savedInstanceState: Bundle?, intent: Intent?) {
@@ -77,30 +80,6 @@ class RegisterActivity : BaseActivity() {
     }
 
 
-    fun onRadioButtonClicked(view: View) {
-        if (view is RadioButton) {
-
-            // Is the button now checked?
-            val checked = view.isChecked
-
-            // Check which radio button was clicked
-            when (view.getId()) {
-                R.id.radio_visible ->
-                    if (checked) {
-                        gendar = "Visitor"
-                        // Pirates are the best
-                    }
-                R.id.radio_employee ->
-                    if (checked) {
-                        gendar = "Employee"
-
-                        // Ninjas rule
-                    }
-            }
-        }
-
-    }
-
     var img = ""
     fun actionCommit(view: View) {
 
@@ -118,139 +97,32 @@ class RegisterActivity : BaseActivity() {
         if (compressedImage == null) {
             showToast("เลือกรูปภาพ")
             return
-        } else if (displayNameET.text.toString().length < 1) {
+        } else if (nameET.text.toString().length < 1) {
             showToast("กรุณาระบุชื่อ")
             return
+        }else if (jobPositionET.text.toString().length < 1) {
+                showToast("กรุณาระบุจุดที่รับผิดชอบ")
+                return
         } else if (telET.text.toString().length < 1) {
             showToast("กรุณาระบุเบอร์มือถือ")
             return
         }
 
 
-        val str = userET.text.toString()
-        Log.e("dd", "${Character.isUpperCase(str[0])} ${countNumbers(str)}")
+        val data = ContactData(
+            img,null,"1001","${nameET.text}","${jobPositionET.text}",null,"${telET.text}"
 
-        var ck = false
-        if (userET.text.toString().length < 7) {
-            ck = true
-        } else if (!Character.isUpperCase(str[0]))
-            ck = true
-        else if (countNumbers(str) < 2)
-            ck = true
-
-        if (ck) {
-            showToast("ตรวจสอบ formate Username")
-            return
-
-        }
-
-
-
-
-
-        if (passET.text.toString().length > 5 && passCFET.text.toString().length > 5) {
-            if (passET.text.toString() == passCFET.getText().toString()) {
-//                if (mName.getText().length > 0 && mLine.getText().length > 0 && mTel.getText().length > 0)
-                Register(
-                    userET.getText().toString().trim({ it <= ' ' }),
-                    passET.text.toString().trim({ it <= ' ' })
-                )
-//                ) else Toast.makeText(
-//                    applicationContext
-//                    , "กรอกข้อมูลให้ครบถ้วน", Toast.LENGTH_SHORT
-//                ).show()
-            } else Toast.makeText(
-                applicationContext
-                , "รหัสผ่านไม่ตรง", Toast.LENGTH_SHORT
-            ).show()
-        } else
-            Toast.makeText(
-                applicationContext
-                , "รหัสผ่านต้องมีความยาวมากกว่า 6 ตัว", Toast.LENGTH_SHORT
-            ).show()
-
-    }
-
-
-    fun countNumbers(str: String): Int {
-
-        var count = 0
-        val pattern = Pattern.compile("[0-9]")
-        val matcher = pattern.matcher(str)
-        while (matcher.find()) {
-            count++
-        }
-        return count
-    }
-
-
-    fun Register(user: String, pass: String) {
-
-        showProgressDialog()
-
-        val user = User(
-            "${user}",
-            "${pass}",
-            "${img}",
-
-            "${displayNameET.text}",
-            "${gendar}",
-            "",
-            "",
-            "${gendar}",1
         )
-        HttpMainConnect().getApiService().register(user).enqueue(InsertData())
+
+        HttpMainConnect()
+            .getApiService()
+            .m_contact(data)
+            .enqueue(CallInsert())
+
+
 
     }
 
-
-    inner class InsertData : Callback<ResponeUserDao> {
-
-        init {
-            showProgressDialog()
-        }
-
-        override fun onFailure(call: Call<ResponeUserDao>, t: Throwable) {
-            hideDialog()
-            showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ภายหลัง")
-
-        }
-
-        override fun onResponse(call: Call<ResponeUserDao>, response: Response<ResponeUserDao>) {
-
-            if (response.isSuccessful) {
-
-
-                if (response.body()!!.status == 0) {
-
-                    hideDialog()
-                    showToast("${response.body()!!.msg}")
-
-                } else
-                    response.body()?.user?.let {
-                        val gson = Gson()
-                        val json = gson.toJson(it)
-                        val edit = spf.edit()
-                        edit.putString("${_UDATA}", "${json}")
-                        edit.commit()
-
-                        val intent = Intent(this@RegisterActivity, MainMapsActivity::class.java)
-                        intent.flags =
-                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-
-                    }
-
-            } else {
-                hideDialog()
-                showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ภายหลัง")
-
-            }
-
-
-        }
-
-    }
 
     //    @RequiresApi(Build.VERSION_CODES.O)
     fun uploadImage(bitmap: Bitmap): String {
@@ -328,7 +200,7 @@ class RegisterActivity : BaseActivity() {
         actualImage?.let { imageFile ->
             lifecycleScope.launch {
                 // Default compression
-                compressedImage = Compressor.compress(this@RegisterActivity, imageFile)
+                compressedImage = Compressor.compress(this@MContactActivity, imageFile)
 //                        upload()
             }
         } ?: showToast("Please choose an image!")
@@ -368,5 +240,24 @@ class RegisterActivity : BaseActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+
+    inner class CallInsert : Callback<ResponeDao> {
+
+
+        override fun onFailure(call: Call<ResponeDao>, t: Throwable) {
+            Log.e("err", "${t.message}")
+        }
+
+        override fun onResponse(call: Call<ResponeDao>, response: Response<ResponeDao>) {
+
+            if (response.isSuccessful) {
+               finish()
+                Log.e("ss", "ss ${response.body()?.status} , ${response.body()?.msg}")
+
+            }
+
+        }
+
+    }
 
 }

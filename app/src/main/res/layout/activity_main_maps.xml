@@ -221,8 +221,9 @@
             app:on="false"
             android:layout_gravity="center"
             app:colorBorder="@color/colorPrimary"/>
-        <com.zine.ketotime.view.CustomTextView
 
+
+        <com.zine.ketotime.view.CustomTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

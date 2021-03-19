@@ -82,11 +82,13 @@ import java.net.URL
 class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylineClickListener,
     GoogleMap.OnMarkerClickListener,
     GoogleMap.OnPolygonClickListener, HandleClickListener {
+
+
+
     private var cicleMarker: Circle? = null
     var data: WorningDataItem? = null
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var adapter: SliderAdapter
-
     lateinit var spf: SharedPreferences
     private var mRouteMarkerList = ArrayList<Marker>()
     private  var mRoutePolyline: Polyline? = null
@@ -128,7 +130,6 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
             override fun onDataChange(snapshot: DataSnapshot) {
                 val edit = spf.edit()
-
                 val size = snapshot.getChildrenCount()
                 edit.putInt("count", size.toInt()).commit()
 
@@ -169,9 +170,13 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
                 when (isOn) {
                     true -> {
-                        edit.putBoolean("status", true).commit()
-                        startService(serviceTracking)
-                        initLineMaps()
+
+                        HttpMainConnect()
+                            .getApiService()
+                            .updateCheckin(
+                                "${user.uid}",0
+                            ).enqueue(CallCheckIn())
+
 
                     }
                     else -> {
@@ -701,8 +706,6 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
         if (mRoutePolyline != null)
             mRoutePolyline?.remove()
 
-//       Log.e("lat1","${currentLocationMarker?.position?.latitude},${currentLocationMarker?.position?.longitude}")
-//       Log.e("lat2","${compLocationMarker?.position?.latitude},${compLocationMarker?.position?.longitude}")
         val directionsCall = HttpMapsConnect().getApiService().getDirections(
             "${currentLocationMarker?.position?.latitude},${currentLocationMarker?.position?.longitude}",
             "${compLocationMarker?.position?.latitude},${compLocationMarker?.position?.longitude}",
@@ -906,10 +909,10 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 
     override fun onItemClick(view: View, position: Int, action: Int) {
 
-
         ImageViewer.Builder(this, sliderItemListURL)
             .setStartPosition(position)
             .show()
+
 
     }
 
@@ -929,5 +932,48 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
 //        mMarker = mGoogleMap.addMarker(markerOptions)
     }
 
+
+
+    inner class CallCheckIn : Callback<ResponeDao>{
+
+
+        override fun onFailure(call: Call<ResponeDao>, t: Throwable) {
+            showToast("เกิดข้อผิดพลาด")
+
+
+        }
+
+        override fun onResponse(call: Call<ResponeDao>, response: Response<ResponeDao>) {
+
+
+            if (response.isSuccessful){
+
+                response.body()?.let {
+                    val edit = spf.edit()
+
+                    if (it.status == 1){
+                        edit.putBoolean("status", true).commit()
+                        val serviceTracking = Intent(this@MainMapsActivity, LocationUpdateService::class.java)
+                        startService(serviceTracking)
+                        initLineMaps()
+                        showToast("บันทึกข้อมูลเรียบร้อย")
+
+                    }else{
+                        switchStatus.isOn = true
+                        showToast("${it.msg}")
+
+
+                    }
+
+                }
+
+
+            }else
+                showToast("เกิดข้อผิดพลาด")
+
+        }
+
+
+    }
 
 }

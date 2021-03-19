@@ -40,10 +40,10 @@ import java.io.IOException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class RegisterActivity : BaseActivity() {
+class AddmemberActivity : BaseActivity() {
 
     lateinit var spf: SharedPreferences
-    var gendar: String = ""
+    var typeEmp: String = ""
     lateinit var user: UserFull
 
     // [END declare_auth]
@@ -61,9 +61,7 @@ class RegisterActivity : BaseActivity() {
         super.onViewReady(savedInstanceState, intent)
 
         spf = getSharedPreferences(_PREFERENCES_NAME, Context.MODE_PRIVATE)
-
-
-        toolbar.title = "จัดการข้อมูลส่วนตัว"
+        toolbar.title = "เพิ่มผู้ดูแล"
         setSupportActionBar(toolbar)
         showBackArrow()
 
@@ -87,12 +85,12 @@ class RegisterActivity : BaseActivity() {
             when (view.getId()) {
                 R.id.radio_visible ->
                     if (checked) {
-                        gendar = "Visitor"
+                        typeEmp = "Visitor"
                         // Pirates are the best
                     }
                 R.id.radio_employee ->
                     if (checked) {
-                        gendar = "Employee"
+                        typeEmp = "Employee"
 
                         // Ninjas rule
                     }
@@ -192,12 +190,11 @@ class RegisterActivity : BaseActivity() {
             "${user}",
             "${pass}",
             "${img}",
-
             "${displayNameET.text}",
-            "${gendar}",
             "",
             "",
-            "${gendar}",1
+            "",
+            "${typeEmp}",2
         )
         HttpMainConnect().getApiService().register(user).enqueue(InsertData())
 
@@ -228,16 +225,18 @@ class RegisterActivity : BaseActivity() {
 
                 } else
                     response.body()?.user?.let {
-                        val gson = Gson()
-                        val json = gson.toJson(it)
-                        val edit = spf.edit()
-                        edit.putString("${_UDATA}", "${json}")
-                        edit.commit()
 
-                        val intent = Intent(this@RegisterActivity, MainMapsActivity::class.java)
-                        intent.flags =
-                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
+                        finish()
+//                        val gson = Gson()
+//                        val json = gson.toJson(it)
+//                        val edit = spf.edit()
+//                        edit.putString("${_UDATA}", "${json}")
+//                        edit.commit()
+//
+//                        val intent = Intent(this@AddmemberActivity, MainMapsActivity::class.java)
+//                        intent.flags =
+//                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//                        startActivity(intent)
 
                     }
 
@@ -328,7 +327,7 @@ class RegisterActivity : BaseActivity() {
         actualImage?.let { imageFile ->
             lifecycleScope.launch {
                 // Default compression
-                compressedImage = Compressor.compress(this@RegisterActivity, imageFile)
+                compressedImage = Compressor.compress(this@AddmemberActivity, imageFile)
 //                        upload()
             }
         } ?: showToast("Please choose an image!")

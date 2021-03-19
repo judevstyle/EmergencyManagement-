@@ -25,9 +25,14 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.idon.emergencmanagement.model.CompanyData
+import com.idon.emergencmanagement.model.ResponeDao
 import com.idon.emergencmanagement.model.UserFull
 import com.idon.emergencmanagement.view.activity.AlermActivity
+import com.zine.ketotime.network.HttpMainConnect
 import com.zine.ketotime.util.Constant
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class LocationUpdateService : Service() {
@@ -261,6 +266,12 @@ class LocationUpdateService : Service() {
                     )
 
 
+                    if (companyData!!.distance!! >  metterDistance){
+
+                        HttpMainConnect().getApiService()
+                            .updateCheckin(user.uid!!,1).enqueue(CallCheckIn())
+
+                    }
                     Log.e("metterDistance","${metterDistance}")
                 }
 
@@ -286,7 +297,7 @@ class LocationUpdateService : Service() {
                     this
                 )
 
-                myRefLocation.child(user.uid!!).removeValue()
+//                myRefLocation.child(user.uid!!).removeValue()
             }
 
 
@@ -363,6 +374,51 @@ class LocationUpdateService : Service() {
 
     private fun deg2rad(deg: Double): Double {
         return deg * Math.PI / 180.0
+    }
+
+
+    inner class CallCheckIn : Callback<ResponeDao> {
+
+
+        override fun onFailure(call: Call<ResponeDao>, t: Throwable) {
+//            showToast("เกิดข้อผิดพลาด")
+            Log.e("ddd","${t.message}")
+
+
+        }
+
+        override fun onResponse(call: Call<ResponeDao>, response: Response<ResponeDao>) {
+
+
+
+            if (response.isSuccessful) {
+
+                response.body()?.let {
+                    Log.e("ddd","ss ${it.msg}")
+
+                    if (it.status == 1) {
+                        val edit = spf.edit()
+                        edit.putBoolean("status", false).commit()
+//                        pf.getBoolean("status", false)
+//                        showToast("บันทึกข้อมูลเรียบร้อย")
+                        Log.e("ddd","ss")
+
+                    } else {
+//                        showToast("เกิดข้อผิดพลาด")
+
+                        Log.e("ddd","err")
+
+                    }
+
+                }
+
+
+            }
+//                showToast("เกิดข้อผิดพลาด")
+
+        }
+
+
     }
 
 

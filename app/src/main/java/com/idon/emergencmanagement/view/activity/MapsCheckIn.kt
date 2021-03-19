@@ -24,6 +24,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.idon.emergencmanagement.R
+import com.idon.emergencmanagement.model.CompanyData
 import com.idon.emergencmanagement.model.MerkerStaff
 import com.idon.emergencmanagement.model.UserFull
 import com.idon.emergencmanagement.view.customview.BottomSheetDescDialog
@@ -43,6 +44,7 @@ import java.net.URL
 
 class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
+    private var compLocationMarker: Marker? = null
     private var savePosition: Marker? = null
     private lateinit var myRef: DatabaseReference
     private lateinit var database: FirebaseDatabase
@@ -75,23 +77,12 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
     override fun onMapReady(googlemap: GoogleMap?) {
         mGoogleMap = googlemap!!
         mGoogleMap!!.setOnMarkerClickListener(this);
-        val latLng = LatLng(13.71946401985561, 100.63507735927159)
-        drawMarkerWithCircle(latLng)
-        showToast("dkowl")
-        val fire2MarkerOptions: MarkerOptions =
-            MarkerOptions().position(latLng)
-                .title("").icon(
-                    BitmapDescriptorFactory.fromBitmap(
-                        createCustomMarkerShop(this)
-                    )
-                )
-
 
 //        val startMarker = mGoogleMap!!.addMarker(startMarkerOptions)
 //        val endMarker = mGoogleMap!!.addMarker(endMarkerOptions)
 
 
-      savePosition =  mGoogleMap!!.addMarker(fire2MarkerOptions)
+//      savePosition =  mGoogleMap!!.addMarker(fire2MarkerOptions)
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
 
@@ -151,11 +142,15 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
 //                mGoogleMap.clear()
 
                 for (ds in snapshot.getChildren()) {
-                    val radiusInMeters = ds.child("radiusInMeters:").value.toString().toInt()
+                    val radiusInMeters = ds.child("radiusInMeters").value.toString().toInt()
                     val lat = ds.child("lat").getValue().toString().toDouble()
                     val lng = ds.child("lng").getValue().toString().toDouble()
                     val gson = Gson()
-
+                    val companyData = CompanyData(
+                        null, null, null, null, lat, lng
+                        , radiusInMeters
+                    )
+                    setSaveMarker(companyData)
 
 
 //                    Log.e("dld", "${lat}")
@@ -170,10 +165,12 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
 
     fun setSaveMarker(userFull: UserFull, locate: LatLng) {
 
+
+
+
+
         val userData = hashMap.get(userFull.uid)
 
-//        Log.e("lat", "${locate.latitude} , ${locate.longitude}")
-//        Log.e("old", "${userData?.lat} , ${userData?.lng}")
 
         if (hashMap.contains(userFull.uid)) {
             Log.e("lat", "${locate.latitude} , ${locate.longitude}")
@@ -186,16 +183,6 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
                 tmp!!.position = locate
 
                 userData?.maerker = tmp
-//                userData?.maerker?.remove()
-
-
-//                var opt = userData!!.maerkerOptions
-//                opt.position(locate)
-//               val m2 = mGoogleMap?.addMarker(userData?.maerkerOptions)
-//                m2.tag = userFull
-//
-//                userData
-//                userData?.maerker = m2
 
                 hashMap.set(userFull.uid!!,userData!!)
                 mGoogleMap!!.animateCamera(
@@ -205,19 +192,6 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
                     )
                 )
 
-
-
-//               val m2 = mGoogleMap?.addMarker(userData?.maerkerOptions)
-//                userData
-//                userData?.maerker = m2
-//                hashMap.set(userFull.uid!!,userData!!)
-//                val marker =
-//                    mGoogleMap!!.animateCamera(
-//                        CameraUpdateFactory.newLatLngZoom(
-//                            userData?.maerker?.position,
-//                            18.0f
-//                        )
-//                    );
 
 
             }
@@ -266,12 +240,12 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
                             hashMap.put(userFull.uid!!, da)
 
 
-                            mGoogleMap!!.animateCamera(
-                                CameraUpdateFactory.newLatLngZoom(
-                                    locate,
-                                    18.0f
-                                )
-                            );
+//                            mGoogleMap!!.animateCamera(
+//                                CameraUpdateFactory.newLatLngZoom(
+//                                    locate,
+//                                    18.0f
+//                                )
+//                            );
 
                             //                        currentLocationMarker = mGoogleMap?.addMarker(mrkerOptions)
 
@@ -368,18 +342,55 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
 
         return true
     }
+    private var cicleMarker: Circle? = null
 
 
-    private fun drawMarkerWithCircle(position: LatLng) {
+    private fun drawMarkerWithCircle(position: LatLng, distance: Int) {
+        cicleMarker?.remove()
+
         val radiusInMeters = 50.0
         val strokeColor = -0x10000 //red outline
         val shadeColor = 0x44ff0000 //opaque red fill
         val circleOptions: CircleOptions =
-            CircleOptions().center(position).radius(radiusInMeters).fillColor(resources.getColor(R.color.colorGreeTran))
+            CircleOptions().center(position).radius(distance.toDouble()).fillColor(resources.getColor(R.color.colorGreeTran))
                 .strokeColor(resources.getColor(R.color.colorGreen)).strokeWidth(8.toFloat())
-        mGoogleMap.addCircle(circleOptions)
+        cicleMarker = mGoogleMap.addCircle(circleOptions)
 //        val markerOptions = MarkerOptions().position(position)
 //        mMarker = mGoogleMap.addMarker(markerOptions)
+    }
+
+    fun setSaveMarker(companyData: CompanyData) {
+
+        compLocationMarker?.remove()
+
+        drawMarkerWithCircle(
+            LatLng(
+                companyData.location_evacuate_lat!!,
+                companyData.location_evacuate_lng!!
+            ), companyData.distance!!
+        )
+
+        val markerOptions: MarkerOptions = MarkerOptions().position(
+            LatLng(
+                companyData.location_evacuate_lat!!,
+                companyData.location_evacuate_lng!!
+            )
+        ).title("").icon(
+            BitmapDescriptorFactory.fromBitmap(
+                createCustomMarkerShop(this)
+            )
+        )
+        mGoogleMap!!.animateCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                LatLng(
+                    companyData.location_evacuate_lat!!,
+                    companyData.location_evacuate_lng!!
+                ), 18.0f
+            )
+        );
+
+        compLocationMarker = mGoogleMap?.addMarker(markerOptions)
+
     }
 
     fun createCustomMarkerShop(
@@ -406,6 +417,14 @@ class MapsCheckIn : BaseActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
         val canvas = Canvas(bitmap)
         marker.draw(canvas)
         return bitmap
+    }
+
+    fun actionCheckInWait(view: View) {
+        startActivity(Intent(this,CheckInListActivity::class.java)
+            .putExtra("type",2)
+        )
+
+
     }
 
 }

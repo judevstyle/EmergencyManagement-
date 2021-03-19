@@ -14,6 +14,7 @@ object Constant {
     const val ACTION_CLICKITEM_ADD = 3
     const val ACTION_CLICKITEM_STATUS = 4
 
+
     const val _PREFERENCES_NAME = "EManage"
     const val _UDATA = "EMuser"
 

@@ -39,11 +39,17 @@ interface APIService {
     fun getCheckInNoneTrack(
     ): Call<ArrayList<UserFull>>
 
+    @GET("load_tacking_checkin.php")
+    fun getCheckInTracking(
+    ): Call<ArrayList<UserFull>>
+
 
 
     @GET("load_accept_woring.php")
     fun getAccept(
     ): Call<WorningData>
+
+
 
 
     @GET("load_contact.php")
@@ -70,11 +76,30 @@ interface APIService {
         @Body user:User
     ): Call<ResponeUserDao>
 
+    @POST("update_contact.php")
+    fun update_contact(
+        @Body data: ContactData
+    ): Call<ResponeDao>
+
+
+    @POST("update_comp.php")
+    fun company(
+        @Body comp:CompanyData
+    ): Call<ResponeDao>
+
 
     @POST("m_worning.php")
     fun woring(
         @Body data:WorningDataItem
     ): Call<ResponeDao>
+
+
+    @POST("m_contact.php")
+    fun m_contact(
+        @Body data:ContactData
+    ): Call<ResponeDao>
+
+
 
 
     @FormUrlEncoded
@@ -92,6 +117,16 @@ interface APIService {
         @Field("wid") wis:String,
         @Field("status") status:Int
     ): Call<ResponeDao>
+
+
+
+    @FormUrlEncoded
+    @POST("m_checkin.php")
+    fun updateCheckin(
+        @Field("uid") uid:String,
+        @Field("status") status:Int
+    ): Call<ResponeDao>
+
 
 
 

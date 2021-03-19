@@ -61,10 +61,18 @@ class CheckInListActivity : BaseActivity(),HandleClickListener{
     }
 
     fun loadData(){
+
         if (type == 1){
             HttpMainConnect()
                 .getApiService()
                 .getCheckIn()
+                .enqueue(CallWorning())
+        }
+
+        if (type == 2){
+            HttpMainConnect()
+                .getApiService()
+                .getCheckInTracking()
                 .enqueue(CallWorning())
         }
         if (type == 3){
