@@ -133,16 +133,20 @@ class RegisterActivity : BaseActivity() {
         var ck = false
         if (userET.text.toString().length < 7) {
             ck = true
-        } else if (!Character.isUpperCase(str[0]))
-            ck = true
-        else if (countNumbers(str) < 2)
-            ck = true
+        }
+//        else if (!Character.isUpperCase(str[0]))
+//            ck = true
+//        else if (countNumbers(str) < 2)
+//            ck = true
+//
 
         if (ck) {
             showToast("ตรวจสอบ formate Username")
             return
 
         }
+
+
 
 
 

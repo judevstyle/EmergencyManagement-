@@ -3,7 +3,8 @@ package com.zine.ketotime.util
 object Constant {
 
 
-    const val BASE_URL =  "http://192.168.43.185/FWorningAPI/"
+    const val BASE_URL = "http://45.91.132.129:81/FWorningAPI/"
+  //  const val BASE_URL =  "http://192.168.43.185/FWorningAPI/"
 
     const val VIEW_TYPE_ITEM = 0
     const val VIEW_TYPE_LOADING = 1

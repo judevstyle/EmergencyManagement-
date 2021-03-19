@@ -1,6 +1,7 @@
 package com.zine.ketotime.network
 
 import com.google.gson.GsonBuilder
+import com.zine.ketotime.util.Constant
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -13,7 +14,7 @@ class HttpMainConnect {
         .create()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://192.168.43.185/FWorningAPI/")
+        .baseUrl("${Constant.BASE_URL}")
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 

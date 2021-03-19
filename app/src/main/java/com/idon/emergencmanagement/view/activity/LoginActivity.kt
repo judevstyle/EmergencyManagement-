@@ -167,9 +167,8 @@ class LoginActivity : BaseActivity(){
                         if (it.type_of_user!! == 1)
                         intent = Intent(this@LoginActivity, MainMapsActivity::class.java)
 
-                        if (it.type_of_user!! == 3)
+                        else if (it.type_of_user!! == 3)
                             intent = Intent(this@LoginActivity, MenuAdminActivity::class.java)
-
                         else
                             intent = Intent(this@LoginActivity, MenuApproveActivity::class.java)
 

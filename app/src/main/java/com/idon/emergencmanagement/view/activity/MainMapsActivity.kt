@@ -15,9 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.annotation.DrawableRes
 import androidx.core.app.ActivityCompat
 import com.bumptech.glide.Glide
@@ -974,6 +972,32 @@ class MainMapsActivity : BaseActivity(), OnMapReadyCallback, GoogleMap.OnPolylin
         }
 
 
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        if (item.itemId == R.id.action_logout){
+
+           val edit = spf.edit()
+            edit.clear().commit()
+            val service = Intent(this@MainMapsActivity, UpdateWorningService::class.java)
+            stopService(service)
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+
+
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
 }
